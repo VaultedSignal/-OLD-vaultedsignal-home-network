@@ -16,7 +16,7 @@ services:
       - /drives/atlantis/tv-shows:/media/tv-shows
       - /drives/atlantis/library:/media/library
       - /drives/atlantis/music:/media/music
-      - /drives/atlantis/Pictures:/media/Pictures
+      - /drives/atlantis/pictures:/media/pictures
     environment:
       - PUID=1000       # my Linux user id
       - PGID=1000       # my Linux group id
