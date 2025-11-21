@@ -1,0 +1,21 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN #Gives gluetun the necessary permissions to manage VPN connections
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - /docker/gluetun:/gluetun
+    environment:
+      - PUID=1000 # Set this to your restricted docker user ID and group ID, otherwise ignore these environment variables
+      - PGID=1000
+      - VPN_SERVICE_PROVIDER=nordvpn
+      - VPN_TYPE=openvpn
+      - OPENVPN_USER=Lpc8FjMND5HTmEg5pJ7HKa3x
+      - OPENVPN_PASSWORD=mmssMbjFzWdJFdxeisWzHTqD
+      - UPDATER_PERIOD=24h
+      - TZ=Europe/Amsterdam
+    ports:
+      - 8888:8888 #port for qbit webui
