@@ -111,10 +111,10 @@ Allow SSH only from the local LAN.
 
 | Command | Description |
 | :--- | :--- |
-| \`sudo ufw allow from $lan-ip/24 to any port 22\` | Allow SSH from LAN only. |
-| \`sudo ufw deny 22/tcp\` | Block external SSH. |
-| \`sudo ufw enable\` | Enable firewall. |
-| \`sudo ufw status verbose\` | Verify rules. |
+| `sudo ufw allow from $lan-ip/24 to any port 22` | Allow SSH from LAN only. |
+| `sudo ufw deny 22/tcp` | Block external SSH. |
+| `sudo ufw enable` | Enable firewall. |
+| `sudo ufw status verbose` | Verify rules. |
 
 ### 2. Fail2Ban
 Prevent brute-force attacks by ignoring the local network.
