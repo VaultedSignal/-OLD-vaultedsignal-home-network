@@ -101,10 +101,10 @@ Restrict access to the trusted **Midway Station** jump host.
 
 | Command | Description |
 | :--- | :--- |
-| \`sudo ufw allow from $midway-station-ip to any port 22\` | Allow SSH from Midway Station only. |
-| \`sudo ufw deny 22/tcp\` | Block all other SSH connections. |
-| \`sudo ufw enable\` | Activate the firewall. |
-| \`sudo ufw status verbose\` | Check firewall status. |
+| `sudo ufw allow from $midway-station-ip to any port 22` | Allow SSH from Midway Station only. |
+| `sudo ufw deny 22/tcp` | Block all other SSH connections. |
+| `sudo ufw enable` | Activate the firewall. |
+| `sudo ufw status verbose` | Check firewall status. |
 
 ### 2. OpenSSH User Restriction
 Only allow connections from specific users on the specific jump host.
