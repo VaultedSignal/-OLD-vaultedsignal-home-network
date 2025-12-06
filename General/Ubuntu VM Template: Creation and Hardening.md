@@ -44,7 +44,7 @@ These settings define the VM's hardware and boot configuration before the OS ins
 4.  **Proxy / Mirror:** Blank / Default.
 5.  **Storage:** Guided configuration, default (destroying data). **Add extra drives later.**
 6.  **Profile:** Fill in user name, server name (`atlantis`), and password.
-7.  **Ubuntu Pro / SSH / Apps:** Skip Pro, **Unchecked** SSH, All Apps **Unchecked**.
+7.  **Ubuntu Pro / SSH / Apps:** Skip Pro, **check** SSH, All Apps **Unchecked**.
 8.  Wait for the installation to finish and reboot.
 9.  In Proxmox, **stop the VM**, **remove the CD drive**, and start the VM again.
 
