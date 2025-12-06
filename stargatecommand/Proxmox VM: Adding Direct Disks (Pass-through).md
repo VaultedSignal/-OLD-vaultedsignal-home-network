@@ -1,7 +1,7 @@
 # ⚙️ Proxmox VM: Adding Direct Disks (Pass-through)
 
-**Author:** [VaultedSignal]
-**Date:** [06-12-2025]
+**Author:** VaultedSignal
+**Date:** 06-12-2025
 **Purpose:** Procedure for adding an entire physical drive to a Proxmox VM using the `qm set` command and disk ID (recommended for stability).
 
 ---
