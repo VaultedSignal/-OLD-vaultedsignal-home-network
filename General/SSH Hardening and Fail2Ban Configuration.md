@@ -1,7 +1,7 @@
 # 🔐 SSH Hardening and Fail2Ban Configuration
 
-**Author:** [Your Name]
-**Date:** [Date of last revision]
+**Author:** VaultedSignal
+**Date:** 06-12-2025
 **Purpose:** Comprehensive guide for installing OpenSSH, configuring key-based authentication, securing the service (banners, no root login), and preventing brute-force attacks with Fail2Ban.
 **Scope:** Works for Ubuntu Server and Proxmox (Debian).
 
