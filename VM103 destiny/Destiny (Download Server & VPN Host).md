@@ -138,3 +138,88 @@ Whitelist the Midway Station IP.
     ```bash
     sudo systemctl restart fail2ban && sudo systemctl status fail2ban
     ```
+
+---
+
+# 🗄️ Storage: Single Drive Preparation and Mounting
+
+**Purpose:** Procedure for securely wiping, partitioning, and permanently mounting a single disk (e.g., 1TB HDD named `theseed`) to the VM.
+
+---
+
+## ⚠️ Part 1: Wipe and Format the Drive
+
+**Target Device:** `/dev/sdb` (Check `lsblk` to verify this is the correct device ID before running!)
+
+### 1. Securely Wipe and Clean the Drive
+This step removes existing signatures and the partition table header.
+
+
+# 1. Wipe file system signatures
+```bash
+sudo wipefs -a /dev/sdb
+```
+
+# 2. Zero out the first 100MB of the drive (optional, but ensures clean start)
+```bash
+sudo dd if=/dev/zero of=/dev/sdb bs=1M count=100
+```
+
+### 2. Partition and Format the Drive
+Create a **GPT** partition table and an **ext4** partition across the entire disk.
+
+
+# 1. Start parted and create a GPT label
+```bash
+sudo parted /dev/sdb mklabel gpt
+```
+
+# 2. Create the primary partition (ext4, 0% to 100%)
+```bash
+sudo parted -a opt /dev/sdb mkpart primary ext4 0% 100%
+```
+
+# 3. Format the new partition (the partition will be /dev/sdb1)
+```bash
+sudo mkfs.ext4 /dev/sdb1
+```
+
+---
+
+## 💾 Part 2: Mount and Configure Persistence
+
+**Target Volume:** Single 1TB Volume (`theseed`)
+
+### 1. Identify UUID and Create Mount Point
+
+1.  Check the UUID of the new partition (assuming the partition is `/dev/sdb1`):
+    ```bash
+    sudo blkid /dev/sdb1
+    ```
+2.  Create the destination mount point:
+    ```bash
+    sudo mkdir -p /drives/theseed
+    ```
+
+### 2. Make Mount Persistent (`/etc/fstab`)
+
+**CRITICAL:** Use the **UUID** found from `sudo blkid` for stable mounting.
+
+1.  Edit the `fstab` configuration file:
+    ```bash
+    sudo nano /etc/fstab
+    ```
+2.  Add the new entry (replace the UUID with the value from step 1):
+    ```fstab
+    # 1TB drive mounted in /drives/theseed
+    UUID=7d58bc88-1128-44ad-86a6-c7a27efd24e5 /drives/theseed ext4 defaults 0 0
+    ```
+
+### 3. Reload and Verify
+Reload the daemon and mount all entries listed in `fstab`.
+
+```bash
+sudo systemctl daemon-reload
+sudo mount -a
+ls /drives/*/ # Verify contents
+```
