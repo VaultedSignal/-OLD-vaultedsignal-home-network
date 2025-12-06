@@ -104,7 +104,7 @@ Copy the content of your **public key** (ending in `.pub`) from your client mach
 1.  On the server, open the authorized keys file:
     ```bash
     mkdir -p ~/.ssh
-    nano ~/.ssh/authorized_keys
+    sudo nano ~/.ssh/authorized_keys
     ```
 2.  Paste the public key (one key per line).
 3.  **Important:** Set correct permissions (SSH is strict about this):
