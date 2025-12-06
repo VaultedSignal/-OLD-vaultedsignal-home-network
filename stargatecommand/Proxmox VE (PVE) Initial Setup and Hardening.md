@@ -1,7 +1,7 @@
 # ⚙️ Proxmox VE (PVE) Initial Setup and Hardening
 
-**Author:** [VaultedSignal]
-**Date:** [06-12-2025]
+**Author:** VaultedSignal
+**Date:** 06-12-2025
 **Purpose:** Post-installation configuration, repository management, network setup, and security hardening (user creation, firewall, Fail2Ban).
 
 ---
