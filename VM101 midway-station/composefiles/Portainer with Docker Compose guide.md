@@ -1,4 +1,4 @@
-# 🐳 Portainer Docker Compose Template
+# 🐳 Portainer with Docker Compose
 
 **Service:** Portainer Community Edition (CE)
 **File:** `portainer-compose.yaml`
