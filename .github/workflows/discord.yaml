@@ -11,5 +11,5 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
           -X POST \
-          -d "{\"content\": \"Repository: ${{ github.repository }}\nPusher: ${{ github.actor }}\nCommit: ${{ github.event.head_commit.message }}\nURL: ${{ github.event.head_commit.url }}\"}" \
+          -d "{\"content\":\"Repository: ${{ github.repository }}\nPusher: ${{ github.actor }}\nCommit: ${{ github.event.head_commit.message }}\nURL: ${{ github.event.head_commit.url }}\"}" \
           ${{ secrets.DISCORD_WEBHOOK }}
