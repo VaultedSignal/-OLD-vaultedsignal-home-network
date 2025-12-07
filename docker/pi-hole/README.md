@@ -56,6 +56,7 @@ sudo nano pi-hole-compose.yaml
 
 ### Compose YAML Content
 ```yaml
+# This is and example of an old file see pi-hole-compose.yaml for the current running version.
 # More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
 services:
   pihole:
