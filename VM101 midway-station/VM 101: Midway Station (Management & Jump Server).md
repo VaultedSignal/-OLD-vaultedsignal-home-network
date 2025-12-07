@@ -141,7 +141,7 @@ Prevent brute-force attacks by ignoring the local network.
 Follow the official documentation: [Docker Install Guide](https://docs.docker.com/engine/install/ubuntu/)
 
 ### 2. Install Portainer (Container Management)
-Reference: [Portainer Install Guide](https://docs.portainer.io/start/install-ce/server/docker/linux).
+Reference: [Portainer Install Guide](https://docs.portainer.io/start/install-ce/server/docker/linux). </br>
 My own document: [🐳 Portainer Docker Compose Template](https://github.com/exparsioz/Home-network/blob/main/VM101%20midway-station/composefiles/portainer-compose.md).
 
 **Quick Setup:**
