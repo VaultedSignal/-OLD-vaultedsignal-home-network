@@ -1,4 +1,4 @@
-# ⚙️ Proxmox VM: Adding Direct Disks (Pass-through)
+# ⚙️ Proxmox VM: Adding Disks to VM (Pass-through)
 
 **Author:** VaultedSignal
 **Date:** 06-12-2025
