@@ -26,8 +26,8 @@ sudo ufw allow 53/tcp
 sudo ufw allow 53/udp
 
 # Allow DHCP (Needed ONLY if Pi-hole is your DHCP server)
-# sudo ufw allow 67/tcp
-# sudo ufw allow 67/udp
+sudo ufw allow 67/tcp
+sudo ufw allow 67/udp
 
 # Allow NTP (Time Synchronization, standard)
 sudo ufw allow 123/udp
