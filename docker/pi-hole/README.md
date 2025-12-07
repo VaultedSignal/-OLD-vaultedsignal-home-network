@@ -86,7 +86,7 @@ services:
     # Volumes store your data between container upgrades
     volumes:
       # Persistence for Pi-hole's databases and common configuration file
-      - './etc-pihole:/etc/pihole'
+      - '/docker/pihole/etc-pihole:/etc/pihole'
     cap_add:
       # NET_ADMIN is required if using Pi-hole as your DHCP server
       - NET_ADMIN
