@@ -1,6 +1,6 @@
-# ?? VaultedSignal Home Lab Infrastructure
+# 🚀 VaultedSignal Home Lab Infrastructure
 
-## ?? Project Overview
+## 🌟 Project Overview
 
 This repository documents the complete configuration, deployment steps, and inventory for the **VaultedSignal Home Lab** infrastructure. The goal is to achieve **Infrastructure as Code (IaC)** principles, making the entire environment highly reproducible, secure, and easy to maintain.
 
@@ -8,7 +8,7 @@ The lab is built on **Proxmox VE** and primarily utilizes **Debian/Ubuntu Server
 
 ---
 
-## ?? Key Design Principles
+## 🎯 Key Design Principles
 
 * **Security First:** All critical services (like SSH) are restricted using UFW and Fail2Ban, accessible only via a hardened Jump Server (`midway-station`).
 * **Centralized DNS:** All network traffic is managed and filtered by a dedicated Pi-hole DNS server (`prometheus`).
@@ -16,7 +16,7 @@ The lab is built on **Proxmox VE** and primarily utilizes **Debian/Ubuntu Server
 
 ---
 
-## ?? Infrastructure Inventory
+## 💻 Infrastructure Inventory
 
 The following virtual machines constitute the core lab environment:
 
@@ -30,11 +30,11 @@ The following virtual machines constitute the core lab environment:
 
 ---
 
-## ?? Getting Started
+## 🧭 Getting Started
 
 To fully understand and replicate this infrastructure, start with the centralized documentation in the `/docs` folder.
 
-### ?? Core Documentation
+### 📚 Core Documentation
 
 | File | Description |
 | :--- | :--- |
@@ -42,7 +42,7 @@ To fully understand and replicate this infrastructure, start with the centralize
 | `docs/03-initial-setup.md` | General checklist for preparing a new Proxmox VM before customization. |
 | `/vms/` | Detailed, step-by-step installation and hardening guides for each individual VM. |
 
-### ?? Application Guides
+### 🐳 Application Guides
 
 | Path | Description |
 | :--- | :--- |
@@ -53,7 +53,7 @@ To fully understand and replicate this infrastructure, start with the centralize
 
 ---
 
-## ??? Deployment Workflow (New VM)
+## 🛠️ Deployment Workflow (New VM)
 
 1. **VM Creation:** Follow the Proxmox specifications found in the respective VM's folder (`/vms/vm-XXX-name/README.md`).
 2. **OS Installation:** Install the base OS (Ubuntu/Debian).
@@ -64,6 +64,6 @@ To fully understand and replicate this infrastructure, start with the centralize
 
 ---
 
-## ?? Contribution
+## 🤝 Contribution
 
 This repository is primarily for personal use, but feel free to open an issue if you have suggestions or spot an error.
