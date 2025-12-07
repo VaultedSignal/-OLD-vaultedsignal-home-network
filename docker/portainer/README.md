@@ -35,6 +35,7 @@ sudo docker compose -f portainer-compose.yaml up -d
 This YAML file defines the Portainer container, ensuring it runs on boot (`restart: always`), is persistent (`volumes`), and exposes the management port.
 
 ```yaml
+#this is ann example see portainer-compose.yaml for current running version.
 services:
   portainer:
     image: portainer/portainer-ce:latest

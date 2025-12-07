@@ -15,6 +15,7 @@ On the **target machine's CLI** execute the following command as `sudo`.
 * **Volumes:** Maps essential Docker directories and the root filesystem (`/:/host`) for full management capabilities.
 
 ```bash
+#this a docker run command see .yaml file for current in use compose version.
 sudo docker run -d \
   -p 9001:9001 \
   --name portainer_agent \
