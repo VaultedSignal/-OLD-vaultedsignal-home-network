@@ -18,8 +18,8 @@ These UFW rules must be applied to the **Prometheus VM** to allow DNS, web admin
 sudo apt install ufw -y
 
 # Allow Web Interface (HTTP/HTTPS)
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
+sudo ufw allow from $lan-ip/24 to any port 80 proto tcp
+sudo ufw allow from $lan-ip/24 to any port 443 proto tc
 
 # Allow DNS Queries (Standard for Pi-hole)
 sudo ufw allow 53/tcp
