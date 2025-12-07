@@ -6,43 +6,7 @@
 
 ---
 
-## 1. Firewall Configuration (UFW)
-
-These UFW rules must be applied to the **Prometheus VM** to allow DNS, web administration, DHCP (if used), and NTP traffic only from your local network.
-
-**Note:** Pi-hole is designed for internal use. These rules allow traffic from the LAN (192.168.0.0/16 is an example range) but block external access for security.
-
-### UFW Rules
-
-```bash
-# Install UFW (if not already installed on Debian/Ubuntu)
-sudo apt install ufw -y
-
-# Allow Web Interface (HTTP/HTTPS)
-sudo ufw allow from $lan-ip/24 to any port 80 proto tcp
-sudo ufw allow from $lan-ip/24 to any port 443 proto tc
-
-# Allow DNS Queries (Standard for Pi-hole)
-sudo ufw allow 53/tcp
-sudo ufw allow 53/udp
-
-# Allow DHCP (Needed ONLY if Pi-hole is your DHCP server)
-sudo ufw allow 67/tcp
-sudo ufw allow 67/udp
-
-# Allow NTP (Time Synchronization, standard)
-sudo ufw allow 123/udp
-
-# Enable the firewall
-sudo ufw enable
-
-# Check status
-sudo ufw status verbose
-```
-
----
-
-## 2. Docker Compose File (`pi-hole-compose.yaml`)
+## 1. Docker Compose File (`pi-hole-compose.yaml`)
 
 This configuration uses your specified settings, including time zone, password, and upstream DNS servers.
 
@@ -122,7 +86,43 @@ sudo docker ps -a | grep pihole
 
 ## 4. Post-Deployment Setup
 
-### A. Add Blocklists
+## 1. Firewall Configuration (UFW)
+
+These UFW rules must be applied to the **Prometheus VM** to allow DNS, web administration, DHCP (if used), and NTP traffic only from your local network.
+
+**Note:** Pi-hole is designed for internal use. These rules allow traffic from the LAN (192.168.0.0/16 is an example range) but block external access for security.
+
+### UFW Rules
+
+```bash
+# Install UFW (if not already installed on Debian/Ubuntu)
+sudo apt install ufw -y
+
+# Allow Web Interface (HTTP/HTTPS)
+sudo ufw allow from $lan-ip/24 to any port 80 proto tcp
+sudo ufw allow from $lan-ip/24 to any port 443 proto tc
+
+# Allow DNS Queries (Standard for Pi-hole)
+sudo ufw allow 53/tcp
+sudo ufw allow 53/udp
+
+# Allow DHCP (Needed ONLY if Pi-hole is your DHCP server)
+sudo ufw allow 67/tcp
+sudo ufw allow 67/udp
+
+# Allow NTP (Time Synchronization, standard)
+sudo ufw allow 123/udp
+
+# Enable the firewall
+sudo ufw enable
+
+# Check status
+sudo ufw status verbose
+```
+
+---
+
+## 2. Add Blocklists
 
 1. Access the Pi-hole WebUI: `http://$prometheus-ip/admin` (or HTTPS on 443).
 2. Log in using the password set in the YAML.

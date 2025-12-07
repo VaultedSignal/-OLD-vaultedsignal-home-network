@@ -13,7 +13,7 @@ Install the required utility packages needed to manage repositories over HTTPS.
 sudo apt update
 
 # 2. Install packages for repository management
-sudo apt install ca-certificates curl gnupg lsb-release -y
+sudo apt install ca-certificates curl -y
 ```
 
 ---
@@ -23,27 +23,28 @@ sudo apt install ca-certificates curl gnupg lsb-release -y
 Docker signs its packages. You must add the GPG key to verify package authenticity and trust the source.
 
 ```bash
-# 1. Create directory for keyring
-sudo mkdir -p /etc/apt/keyrings
-
-# 2. Download the GPG key, de-armor it, and save it to the keyrings directory
-# The gpg command may require elevated privileges
-curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo apt update
+ sudo apt install ca-certificates curl
+ sudo install -m 0755 -d /etc/apt/keyrings
+ sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+ sudo chmod a+r /etc/apt/keyrings/docker.asc
 ```
 
 ---
 
 ## 3. Set up the Stable Repository
 
-Add the Docker stable repository to your system's package list. The command uses `$(lsb_release -cs)` to automatically determine your distribution's codename (e.g., `jammy`, `bullseye`).
+Add the Docker stable repository to your system's package list. The command uses `Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")` to automatically determine your distribution's codename.
 
 ```bash
 # Add the Docker stable repository to Apt sources list
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
-  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-# Update the package index again with the new repository
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
 sudo apt update
 ```
 
@@ -54,7 +55,7 @@ sudo apt update
 Install the core packages: the Docker Engine (`docker-ce`), the Command Line Interface (`docker-ce-cli`), and the container runtime (`containerd.io`).
 
 ```bash
-sudo apt install docker-ce docker-ce-cli containerd.io -y
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
 ```
 
 ---
@@ -81,7 +82,7 @@ Run the `hello-world` container to ensure Docker is installed correctly and is a
 
 ```bash
 # This command pulls and runs a test container
-docker run hello-world
+sudo docker run hello-world
 ```
 
 If successful, you will see a message confirming the installation works.
