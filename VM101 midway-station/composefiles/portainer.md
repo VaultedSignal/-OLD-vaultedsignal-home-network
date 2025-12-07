@@ -64,6 +64,6 @@ Once the stack is running, you can access the UI via your web browser:
     ```bash
     sudo docker ps -a
     ```
-2.  Access the UI: **https://[Your VM IP Address]:9443/** (e.g., `https://$midway-station-ip:9443/`)
+2.  Access the UI: **https://$midway-station-ip:9443/** (e.g., `https://$midway-station-ip:9443/`)
 
 The first time you connect, you will be prompted to create your admin password.
