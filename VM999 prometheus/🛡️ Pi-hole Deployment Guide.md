@@ -32,9 +32,6 @@ sudo ufw allow 67/udp
 # Allow NTP (Time Synchronization, standard)
 sudo ufw allow 123/udp
 
-# Optional: Allow SSH from your Management VM (Midway Station) if not done already
-# sudo ufw allow from $midway-station-ip to any port 22
-
 # Enable the firewall
 sudo ufw enable
 
