@@ -174,3 +174,15 @@ Whitelist the Midway Station IP.
     ```bash
     systemctl restart fail2ban && systemctl status fail2ban
     ```
+
+---
+
+## 🐳 Docker & Portainer Setup
+
+### 1. Install Docker Engine
+Reference: [Docker Install Guide](https://docs.docker.com/engine/install/ubuntu/) </br>
+My own document: [🐳 Docker Engine Installation](https://github.com/exparsioz/Home-network/blob/main/General/%F0%9F%90%B3%20Docker%20Engine%20Installation.md) </br>
+
+## 🤖 Portainer Portainer Agent Installation & Portainer Setup
+Reference: [Portainer Agent Install Guide](https://docs.portainer.io/admin/environments/add/docker/agent) </br>
+My own document: [🤖 Portainer Agent Installation](https://github.com/exparsioz/Home-network/blob/main/General/%F0%9F%A4%96%20Portainer%20Agent%20Installation.md) </br>
