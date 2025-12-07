@@ -4,7 +4,7 @@
 
 This repository documents the complete configuration, deployment steps, and inventory for the **VaultedSignal Home Lab** infrastructure. The goal is to achieve **Infrastructure as Code (IaC)** principles, making the entire environment highly reproducible, secure, and easy to maintain.
 
-The lab is built on **Proxmox VE** and primarily utilizes **Debian/Ubuntu Server** VMs configured for various network services and dedicated applications. 
+The lab is built on **Proxmox VE** and primarily utilizes **Debian/Ubuntu Server** VMs configured for various network services and dedicated applications.
 
 ---
 
@@ -55,12 +55,12 @@ To fully understand and replicate this infrastructure, start with the centralize
 
 ## ??? Deployment Workflow (New VM)
 
-1.  **VM Creation:** Follow the Proxmox specifications found in the respective VM's folder (`/vms/vm-XXX-name/README.md`).
-2.  **OS Installation:** Install the base OS (Ubuntu/Debian).
-3.  **Basic Setup:** Run common cleanup and directory creation scripts from `/scripts/`.
-4.  **Network Config:** Apply the static IP settings (Netplan/interfaces) specified in the VM's guide.
-5.  **Security Hardening:** Apply **UFW** and **Fail2Ban** rules (allowing SSH only from `midway-station`).
-6.  **Storage/Application:** Configure storage mounts (`/etc/fstab`) and deploy Docker applications (using YAML files from `/docker`).
+1. **VM Creation:** Follow the Proxmox specifications found in the respective VM's folder (`/vms/vm-XXX-name/README.md`).
+2. **OS Installation:** Install the base OS (Ubuntu/Debian).
+3. **Basic Setup:** Run common cleanup and directory creation scripts from `/scripts/`.
+4. **Network Config:** Apply the static IP settings (Netplan/interfaces) specified in the VM's guide.
+5. **Security Hardening:** Apply **UFW** and **Fail2Ban** rules (allowing SSH only from `midway-station`).
+6. **Storage/Application:** Configure storage mounts (`/etc/fstab`) and deploy Docker applications (using YAML files from `/docker`).
 
 ---
 

@@ -19,6 +19,7 @@ Follow these steps on the **Proxmox Host** to safely attach the disk.
 ### 1. Stop the Virtual Machine
 
 Before making hardware changes, ensure the VM is stopped.
+
 ```bash
 sudo qm stop $vm-id
 ```
@@ -26,6 +27,7 @@ sudo qm stop $vm-id
 ### 2. Identify the Target Drive
 
 Identify the device name (e.g., `/dev/sdb`) of the drive you wish to pass through.
+
 ```bash
 lsblk
 ```
@@ -33,6 +35,7 @@ lsblk
 ### 3. Ensure the Drive is Unmounted
 
 If the drive was previously mounted or has partitions, you must **unmount** them to prevent data corruption or conflicts.
+
 ```bash
 sudo umount /dev/sdX* # Unmounts all partitions as well (e.g., /dev/sdb*)
 ```
@@ -58,6 +61,7 @@ sudo qm set $vm-id -scsi1 /dev/disk/by-id/$disk-id
 ### 6. Start the Virtual Machine
 
 Once the disk is attached, restart the VM. The new drive will be available inside the guest operating system (OS).
+
 ```bash
 sudo qm start $vm-id
 ```

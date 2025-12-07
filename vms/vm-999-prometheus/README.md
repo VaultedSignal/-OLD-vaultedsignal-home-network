@@ -39,23 +39,29 @@ This VM must have the **highest startup priority** as it provides DNS for the en
 
 ## 💾 Debian Server Installation & Initial Setup
 
-1.  **Installation:** Use the Debian Server ISO with default settings.
-2.  **Disk:** All in one partition.
-3.  **SSH:** Enable SSH during installation.
-4.  **Reboot:** Stop VM in Proxmox, remove ISO, start VM.
+1. **Installation:** Use the Debian Server ISO with default settings.
+2. **Disk:** All in one partition.
+3. **SSH:** Enable SSH during installation.
+4. **Reboot:** Stop VM in Proxmox, remove ISO, start VM.
 
 ### 0. Optimize GRUB Bootloader
+
 Skip the boot menu countdown for faster startup.
 
-1.  Elevate to superuser:
+1. Elevate to superuser:
+
     ```bash
     su -
     ```
-2.  Edit GRUB configuration:
+
+2. Edit GRUB configuration:
+
     ```bash
     nano /etc/default/grub
     ```
-3.  Ensure the following entries are set:
+
+3. Ensure the following entries are set:
+
     ```ini
     GRUB_DEFAULT=0
     GRUB_TIMEOUT=0
@@ -64,12 +70,15 @@ Skip the boot menu countdown for faster startup.
     GRUB_CMDLINE_LINUX_DEFAULT="quiet"
     GRUB_CMDLINE_LINUX=""
     ```
-4.  Update GRUB configuration:
+
+4. Update GRUB configuration:
+
     ```bash
     update-grub
     ```
 
 ### 1. Post-Install VM Maintenance
+
 ```bash
 # Update and Clean
 su -
@@ -79,6 +88,7 @@ reboot now
 ```
 
 ### 2. Create Directory Structure
+
 ```bash
 # These directories are typically not needed for a standard Pi-hole install, 
 # but are included for consistency.
@@ -87,17 +97,23 @@ mkdir -p /docker/composefiles
 ```
 
 ### 3. Network Configuration (Debian Interfaces)
+
 Set a static IP using the traditional Debian configuration file (`/etc/network/interfaces`).
 
-1.  Elevate to superuser:
+1. Elevate to superuser:
+
     ```bash
     su -
     ```
-2.  Edit network configuration file:
+
+2. Edit network configuration file:
+
     ```bash
     nano /etc/network/interfaces
     ```
-3.  Change interfaces file (assuming interface name `ens18`):
+
+3. Change interfaces file (assuming interface name `ens18`):
+
     ```ini
     auto lo
     iface lo inet loopback
@@ -109,15 +125,20 @@ Set a static IP using the traditional Debian configuration file (`/etc/network/i
             gateway $modem-ip
             dns-nameservers 127.0.0.1 1.1.1.1
     ```
-4.  Modify the resolver file to prevent external services from overwriting Pi-hole's local DNS pointer:
+
+4. Modify the resolver file to prevent external services from overwriting Pi-hole's local DNS pointer:
+
     ```bash
     nano /etc/resolv.conf
     ```
+
     ```text
     nameserver 127.0.0.1
     nameserver 1.1.1.1
     ```
-5.  Restart networking:
+
+5. Restart networking:
+
     ```bash
     systemctl restart networking
     ```
@@ -127,13 +148,17 @@ Set a static IP using the traditional Debian configuration file (`/etc/network/i
 ## 🔒 Security Hardening (Firewall & SSH)
 
 ### 1. UFW Firewall
+
 Restrict SSH access to the trusted **Midway Station** jump host.
 
-1.  Install UFW:
+1. Install UFW:
+
     ```bash
     apt install ufw -y
     ```
-2.  Configure rules (Note: these commands require running as root or with `sudo`):
+
+2. Configure rules (Note: these commands require running as root or with `sudo`):
+
     | Command | Description |
     | :--- | :--- |
     | `ufw allow from $midway-station-ip to any port 22` | Allow SSH from Midway Station only. |
@@ -142,35 +167,47 @@ Restrict SSH access to the trusted **Midway Station** jump host.
     | `ufw status verbose` | Check firewall status. |
 
 ### 2. OpenSSH User Restriction
+
 Only allow connections from specific users on the specific jump host.
 
-1.  Edit the configuration:
+1. Edit the configuration:
+
     ```bash
     nano /etc/ssh/sshd_config
     ```
-2.  Add or modify the user restriction:
+
+2. Add or modify the user restriction:
+
     ```ini
     # Allowed Users
     AllowUsers $username-current-machine@$midway-station-ip
     ```
-3.  Restart SSH service:
+
+3. Restart SSH service:
+
     ```bash
     systemctl restart ssh
     ```
 
 ### 3. Fail2Ban
+
 Whitelist the Midway Station IP.
 
-1.  Edit jail config:
+1. Edit jail config:
+
     ```bash
     nano /etc/fail2ban/jail.local
     ```
-2.  Add whitelist:
+
+2. Add whitelist:
+
     ```ini
     [DEFAULT]
     ignoreip = 127.0.0.1/8 $midway-station-ip
     ```
-3.  Restart service:
+
+3. Restart service:
+
     ```bash
     systemctl restart fail2ban && systemctl status fail2ban
     ```
@@ -180,9 +217,11 @@ Whitelist the Midway Station IP.
 ## 🐳 Docker & Portainer Setup
 
 ### 1. Install Docker Engine
+
 Reference: [Docker Install Guide](https://docs.docker.com/engine/install/ubuntu/) </br>
-My own document: [🐳 Docker Engine Installation](https://github.com/exparsioz/Home-network/blob/main/General/%F0%9F%90%B3%20Docker%20Engine%20Installation.md) </br>
+My own document:
 
 ## 🤖 Portainer Agent Installation & Portainer Setup
+
 Reference: [Portainer Agent Install Guide](https://docs.portainer.io/admin/environments/add/docker/agent) </br>
-My own document: [🤖 Portainer Agent Installation](https://github.com/exparsioz/Home-network/blob/main/General/%F0%9F%A4%96%20Portainer%20Agent%20Installation.md) </br>
+My own document:

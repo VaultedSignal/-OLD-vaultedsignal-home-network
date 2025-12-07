@@ -11,6 +11,7 @@
 These steps cover the basic requirements to get Proxmox operational and ready for use.
 
 ### 1. PVE Installation
+
 Install Proxmox Virtual Environment following standard procedures.
 
 ### 2. Configure Non-Subscription Repositories
@@ -22,16 +23,19 @@ To receive updates without an Enterprise subscription:
 * **Add** the non-subscription version of the repositories (e.g., `pve-no-subscription`).
 
 ### 3. Update PVE
+
 Apply all available system updates.
 * Navigate to **Updates** > **Refresh**.
 * Click **Upgrade** to apply the updates.
 
 ### 4. Upload ISO Files
+
 Upload operating system installation images for future Virtual Machines.
 * Navigate to **Local** (Storage) > **ISO Images**.
 * Click **Upload** to add ISO files.
 
 ### 5. Create Virtual Machines
+
 Proceed with creating and configuring VMs as needed.
 
 ---
@@ -44,15 +48,20 @@ These steps change identifying information and network settings on the Proxmox h
 
 Change the server's name for easier identification on the network.
 
-1.  Edit the hostname file:
+1. Edit the hostname file:
+
     ```bash
     nano /etc/hostname
     ```
-2.  Edit the hosts file:
+
+2. Edit the hosts file:
+
     ```bash
     nano /etc/hosts
     ```
-3.  Reboot the server to apply changes:
+
+3. Reboot the server to apply changes:
+
     ```bash
     reboot
     ```
@@ -61,11 +70,13 @@ Change the server's name for easier identification on the network.
 
 Configure the primary network bridge (`vmbr0`) with a static IP and gateway.
 
-1.  Edit the network configuration file:
+1. Edit the network configuration file:
+
     ```bash
     sudo nano /etc/network/interfaces
     ```
-2.  Use the following configuration snippet:
+
+2. Use the following configuration snippet:
 
     ```ini
     auto lo
@@ -88,17 +99,22 @@ Configure the primary network bridge (`vmbr0`) with a static IP and gateway.
 
 Ensure the host can correctly resolve domain names.
 
-1.  Edit the resolver configuration file:
+1. Edit the resolver configuration file:
+
     ```bash
     sudo nano /etc/resolv.conf
     ```
-2.  Add a new nameserver entry:
+
+2. Add a new nameserver entry:
+
     ```ini
     nameserver XXX.XXX.XXX.XXX
     ```
 
 ### Apply Changes
+
 After network edits, a full reboot is required for stability.
+
 ```bash
 reboot now
 ```
@@ -113,44 +129,54 @@ Secure the PVE host by creating a non-root administrative user and implementing 
 
 Create a standard user with administrative privileges to replace root access.
 
-1.  **Create User:** **Permissions** > **Users** > **Add**.
-2.  **Grant Admin Role:** **Permissions** > **Add** (under the `/` path).
+1. **Create User:** **Permissions** > **Users** > **Add**.
+2. **Grant Admin Role:** **Permissions** > **Add** (under the `/` path).
     * **Path:** `/`
     * **User:** Select the new user.
     * **Role:** Administrator
 
 ### Enable Two-Factor Authentication (2FA) for New User
 
-1.  **Recovery Keys:** **Permissions** > **Two Factor** > **Recovery Keys**. (Save these securely!)
-2.  **Enable TOTP:** **Permissions** > **Two Factor** > **Add** > **TOTP**.
+1. **Recovery Keys:** **Permissions** > **Two Factor** > **Recovery Keys**. (Save these securely!)
+2. **Enable TOTP:** **Permissions** > **Two Factor** > **Add** > **TOTP**.
 
 ### Enable User for SU and SUDO Access
 
 This allows the new user to execute administrative commands via the command line.
 
-1.  Ensure the home directory exists (while logged in as root):
+1. Ensure the home directory exists (while logged in as root):
+
     ```bash
     mkdir -p /home/$username
     chown $username:$username /home/$username
     chmod 700 /home/$username
     ```
-2.  Set the default shell to Bash:
+
+2. Set the default shell to Bash:
+
     ```bash
     usermod -s /bin/bash $username
     ```
-3.  Install `sudo` if missing:
+
+3. Install `sudo` if missing:
+
     ```bash
     apt update && apt install sudo
     ```
-4.  Add the user to the `sudo` group:
+
+4. Add the user to the `sudo` group:
+
     ```bash
     usermod -aG sudo $username
     ```
-5.  **Verify** sudo access:
+
+5. **Verify** sudo access:
+
     ```bash
     su - $username
     sudo whoami
     ```
+
     > **Expected Output:** `root`
 
 ### Disable Root WEBUI Login
@@ -164,19 +190,27 @@ Prevent root from logging in via the web interface.
 
 This is a cosmetic change that removes the persistent notification in the web interface.
 
-1.  Navigate to the directory:
+1. Navigate to the directory:
+
     ```bash
+
     cd /usr/share/javascript/proxmox-widget-toolkit
     ```
-2.  Backup the original file:
+
+2. Backup the original file:
+
     ```bash
     cp proxmoxlib.js proxmoxlib.js.bak
     ```
-3.  Edit the file to remove the pop-up function (search for the relevant function and change or void it):
+
+3. Edit the file to remove the pop-up function (search for the relevant function and change or void it):
+
     ```bash
     nano proxmoxlib.js
     ```
-4.  **Important:** Fully shut down and restart the server (do not use a soft reboot command):
+
+4. **Important:** Fully shut down and restart the server (do not use a soft reboot command):
+
     ```bash
     sudo shutdown
     ```
@@ -193,26 +227,31 @@ Configure UFW to explicitly allow access only from your LAN.
 
 | Command | Protocol/Port | Description |
 | :--- | :--- | :--- |
-| \`sudo ufw allow from $lan-ip/24 to any port 22 proto tcp\` | SSH (22/tcp) | Explicitly allows SSH access ONLY from your LAN subnet. |
-| \`sudo ufw allow from $lan-ip/24 to any port 8006 proto tcp\` | PVE WEBGUI (8006/tcp) | Allows the Proxmox web interface ONLY from your LAN subnet. |
-| \`sudo ufw deny 22/tcp\` | SSH (22/tcp) | Blocks all other SSH connections (e.g., from the WAN). |
-| \`sudo ufw enable\` | N/A | Activates the firewall. |
-| \`sudo ufw status verbose\` | N/A | Check the firewall rules and status. |
+| `sudo ufw allow from $lan-ip/24 to any port 22 proto tcp` | SSH (22/tcp) | Explicitly allows SSH access ONLY from your LAN subnet. |
+| `sudo ufw allow from $lan-ip/24 to any port 8006 proto tcp` | PVE WEBGUI (8006/tcp) | Allows the Proxmox web interface ONLY from your LAN subnet. |
+| `sudo ufw deny 22/tcp\` | SSH (22/tcp) | Blocks all other SSH connections (e.g., from the WAN). |
+| `sudo ufw enable` | N/A | Activates the firewall. |
+| `sudo ufw status verbose` | N/A | Check the firewall rules and status. |
 
 ### Fail2Ban Configuration
 
 Prevent brute-force attacks by having Fail2Ban ignore connection attempts from the trusted LAN.
 
-1.  Edit the local jail configuration:
+1. Edit the local jail configuration:
+
     ```bash
     sudo nano /etc/fail2ban/jail.local
     ```
-2.  Add the following lines under the `[DEFAULT]` section, including your LAN subnet:
+
+2. Add the following lines under the `[DEFAULT]` section, including your LAN subnet:
+
     ```ini
     [DEFAULT]
     ignoreip = 127.0.0.1/8 $lan-ip/24 # Doesnt jail local IP and LAN network
     ```
-3.  Restart and check the service status:
+
+3. Restart and check the service status:
+
     ```bash
     sudo systemctl restart fail2ban && sudo systemctl status fail2ban
     ```

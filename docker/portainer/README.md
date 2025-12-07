@@ -9,6 +9,7 @@
 ## 1️⃣ Deployment Steps (On Your VM)
 
 ### A. Create Data Volume Directory
+
 First, ensure you are in the correct directory (e.g., `/docker/portainer`) and create the necessary volume folder.
 
 ```bash
@@ -23,6 +24,7 @@ sudo nano portainer-compose.yaml
 ```
 
 ### B. Run the Stack
+
 Paste the YAML content below into the file and save it. Then, deploy the stack:
 
 ```bash
@@ -61,10 +63,12 @@ services:
 
 Once the stack is running, you can access the UI via your web browser:
 
-1.  Check the container status:
+1. Check the container status:
+
     ```bash
     sudo docker ps -a
     ```
+
 2.  Access the UI: **https://$vm-ip:9443/** (e.g., `https://$midway-station-ip:9443/`)
 
 The first time you connect, you will be prompted to create your admin password.

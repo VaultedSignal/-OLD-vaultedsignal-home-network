@@ -38,15 +38,15 @@ These settings define the VM's hardware and boot configuration before the OS ins
 
 ## 💾 Ubuntu Server Installation
 
-1.  **Language / Keyboard:** English / Default.
-2.  **Installation Base:** Ubuntu Server.
-3.  **Network Configuration:** Default (DHCP) — **Fix later with static IP.**
-4.  **Proxy / Mirror:** Blank / Default.
-5.  **Storage:** Guided configuration, default (destroying data). **Add extra drives later.**
-6.  **Profile:** Fill in user name, server name (`$servername`), and password.
-7.  **Ubuntu Pro / SSH / Apps:** Skip Pro, **check** SSH, All Apps **Unchecked**.
-8.  Wait for the installation to finish and reboot.
-9.  In Proxmox, **stop the VM**, **remove the CD drive**, and start the VM again.
+1. **Language / Keyboard:** English / Default.
+2. **Installation Base:** Ubuntu Server.
+3. **Network Configuration:** Default (DHCP) — **Fix later with static IP.**
+4. **Proxy / Mirror:** Blank / Default.
+5. **Storage:** Guided configuration, default (destroying data). **Add extra drives later.**
+6. **Profile:** Fill in user name, server name (`$servername`), and password.
+7. **Ubuntu Pro / SSH / Apps:** Skip Pro, **check** SSH, All Apps **Unchecked**.
+8. Wait for the installation to finish and reboot.
+9. In Proxmox, **stop the VM**, **remove the CD drive**, and start the VM again.
 
 ---
 
@@ -54,18 +54,23 @@ These settings define the VM's hardware and boot configuration before the OS ins
 
 ### 1. Initial Setup and User Management
 
-1.  **Create Directories:**
+1. **Create Directories:**
+
     ```bash
     mkdir /drives # For all mounted data drives
     mkdir /docker # For all docker related stuff
     mkdir /docker/composefiles # For compose.yaml files
     ```
-2.  **Disable Root Local Login:**
+
+2. **Disable Root Local Login:**
+
     ```bash
     sudo passwd -S root # Check if root is locked ("root L" means locked)
     sudo passwd -l root # Locks the root account if it is not locked already
     ```
-3.  **Update VM:**
+
+3. **Update VM:**
+
     ```bash
     sudo apt update && sudo apt upgrade -y # Search for and install updates
     sudo apt clean && sudo apt autoremove && sudo apt autoclean # Remove old files
@@ -76,15 +81,20 @@ These settings define the VM's hardware and boot configuration before the OS ins
 
 This uses **Netplan** to set a permanent static IP address.
 
-1.  Identify the correct network interface name:
+1. Identify the correct network interface name:
+
     ```bash
     ip a
     ```
-2.  Edit the Netplan configuration file:
+
+2. Edit the Netplan configuration file:
+
     ```bash
     sudo nano /etc/netplan/50-cloud-init.yaml
     ```
-3.  Apply the following structure (replacing `enp6s18` with your interface name):
+
+3. Apply the following structure (replacing `enp6s18` with your interface name):
+
     ```yaml
     network:
       version: 2
@@ -98,7 +108,9 @@ This uses **Netplan** to set a permanent static IP address.
           nameservers:
             addresses: [$prometheus-ip, 1.1.1.1] # Primary DNS (Pi-hole), Secondary DNS
     ```
-4.  Apply the new network settings:
+
+4. Apply the new network settings:
+
     ```bash
     sudo netplan apply
     ```
@@ -115,25 +127,30 @@ Restrict inbound access to only the trusted **Midway Station** jump host.
 
 | Command | Port/Action | Description |
 | :--- | :--- | :--- |
-| \`sudo ufw allow from $midway-station-ip to any port 22 proto tcp\` | SSH (22/tcp) | Explicitly allows SSH access ONLY from the Midway Station IP. |
-| \`sudo ufw deny 22/tcp\` | SSH (22/tcp) | Blocks all other SSH connections. |
-| \`sudo ufw enable\` | N/A | Activates the firewall. |
-| \`sudo ufw status verbose\` | N/A | Check the active firewall rules. |
+| `sudo ufw allow from $midway-station-ip to any port 22 proto tcp` | SSH (22/tcp) | Explicitly allows SSH access ONLY from the Midway Station IP. |
+| `sudo ufw deny 22/tcp` | SSH (22/tcp) | Blocks all other SSH connections. |
+| `sudo ufw enable` | N/A | Activates the firewall. |
+| `sudo ufw status verbose` | N/A | Check the active firewall rules. |
 
 ### 2. OpenSSH Server Configuration
 
 Restrict which users can connect and from which source IP.
 
-1.  Edit the SSH daemon configuration file:
+1. Edit the SSH daemon configuration file:
+
     ```bash
     sudo nano /etc/ssh/sshd_config
     ```
-2.  Add or modify the `AllowUsers` directive:
+
+2. Add or modify the `AllowUsers` directive:
+
     ```ini
     # Allowed users
     AllowUsers $username-current-machine@$midway-station-ip # Only this user can connect from the Midway Station IP
     ```
-3.  Restart the SSH service:
+
+3. Restart the SSH service:
+
     ```bash
     sudo systemctl restart ssh
     ```
@@ -142,16 +159,21 @@ Restrict which users can connect and from which source IP.
 
 Configure Fail2Ban to ignore connections coming from the trusted **Midway Station**.
 
-1.  Edit the local jail configuration:
+1. Edit the local jail configuration:
+
     ```bash
     sudo nano /etc/fail2ban/jail.local
     ```
-2.  Add the trusted host to the `ignoreip` list:
+
+2. Add the trusted host to the `ignoreip` list:
+
     ```ini
     [DEFAULT]
     ignoreip = 127.0.0.1/8 $midway-station-ip # Does not jail local IP and Midway Station IP
     ```
-3.  Restart and check the service status:
+
+3. Restart and check the service status:
+
     ```bash
     sudo systemctl restart fail2ban && sudo systemctl status fail2ban
     ```

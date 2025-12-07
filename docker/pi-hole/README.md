@@ -13,6 +13,7 @@ These UFW rules must be applied to the **Prometheus VM** to allow DNS, web admin
 **Note:** Pi-hole is designed for internal use. These rules allow traffic from the LAN (192.168.0.0/16 is an example range) but block external access for security.
 
 ### UFW Rules
+
 ```bash
 # Install UFW (if not already installed on Debian/Ubuntu)
 sudo apt install ufw -y
@@ -46,6 +47,7 @@ sudo ufw status verbose
 This configuration uses your specified settings, including time zone, password, and upstream DNS servers.
 
 ### File Location and Creation
+
 ```bash
 # Navigate to the correct directory on Prometheus VM
 cd /docker/composefiles
@@ -55,6 +57,7 @@ sudo nano pi-hole-compose.yaml
 ```
 
 ### Compose YAML Content
+
 ```yaml
 # This is and example of an old file see pi-hole-compose.yaml for the current running version.
 # More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
@@ -103,12 +106,14 @@ services:
 ## 3. Deployment and Verification
 
 ### A. Start the Container
+
 ```bash
 # Start the Pi-hole container in detached mode
 sudo docker compose -f pi-hole-compose.yaml up -d
 ```
 
 ### B. Verify Status
+
 ```bash
 sudo docker ps -a | grep pihole
 ```
@@ -118,9 +123,10 @@ sudo docker ps -a | grep pihole
 ## 4. Post-Deployment Setup
 
 ### A. Add Blocklists
-1.  Access the Pi-hole WebUI: `http://$prometheus-ip/admin` (or HTTPS on 443).
-2.  Log in using the password set in the YAML.
-3.  Go to **Adlists** and add the following URLs:
+
+1. Access the Pi-hole WebUI: `http://$prometheus-ip/admin` (or HTTPS on 443).
+2. Log in using the password set in the YAML.
+3. Go to **Adlists** and add the following URLs:
 
 | Source | URL |
 | :--- | :--- |
@@ -129,9 +135,10 @@ sudo docker ps -a | grep pihole
 | Hagezi TIF | `https://gitlab.com/hagezi/mirror/-/raw/main/dns-blocklists/adblock/tif.txt` |
 | Hagezi Fake | `https://gitlab.com/hagezi/mirror/-/raw/main/dns-blocklists/adblock/fake.txt` |
 
-4.  Go to **Tools** > **Update Gravity** to apply the new lists.
+4. Go to **Tools** > **Update Gravity** to apply the new lists.
 
 ### B. Router/Modem Configuration
+
 To enable network-wide filtering, set the Pi-hole's static IP as the primary DNS server in your router/modem settings.
 
 | Setting | Value |

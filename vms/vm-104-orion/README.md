@@ -39,12 +39,13 @@ This VM uses a **Shutdown Timeout** to ensure running game servers save state be
 
 ## 💾 Ubuntu Server Installation & Initial Setup
 
-1.  **Installation:** Use the Ubuntu Server ISO with default settings.
-2.  **Profile:** Use `$username` and server name `orion`.
-3.  **SSH:** Enable SSH during installation.
-4.  **Reboot:** Stop VM in Proxmox, remove ISO, start VM.
+1. **Installation:** Use the Ubuntu Server ISO with default settings.
+2. **Profile:** Use `$username` and server name `orion`.
+3. **SSH:** Enable SSH during installation.
+4. **Reboot:** Stop VM in Proxmox, remove ISO, start VM.
 
 ### 1. Post-Install VM Maintenance
+
 ```bash
 # Update and Clean
 sudo apt update && sudo apt upgrade -y
@@ -57,23 +58,31 @@ sudo passwd -l root # Locks the root account if it is not locked already
 ```
 
 ### 2. Create Directory Structure
+
 ```bash
 sudo mkdir -p /drives          # For mounting the 1TB SSD (sbcglocken)
 sudo mkdir -p /docker/composefiles # For Docker configs
 ```
 
 ### 3. Network Configuration (Netplan)
+
 Set a static IP using Netplan.
 
-1.  Check interface name:
+1. Check interface name:
+
     ```bash
     ip a
     ```
-2.  Edit configuration:
+
+2. Edit configuration:
+
     ```bash
+
     sudo nano /etc/netplan/50-cloud-init.yaml
     ```
-3.  Paste configuration:
+
+3. Paste configuration:
+
     ```yaml
     network:
       version: 2
@@ -87,7 +96,9 @@ Set a static IP using Netplan.
           nameservers:
             addresses: [$prometheus-ip, 1.1.1.1]
     ```
-4.  Apply changes:
+
+4. Apply changes:
+
     ```bash
     sudo netplan apply
     ```
@@ -97,6 +108,7 @@ Set a static IP using Netplan.
 ## 🔒 Security Hardening (Firewall & SSH)
 
 ### 1. UFW Firewall
+
 Restrict access to the trusted **Midway Station** jump host.
 
 | Command | Description |
@@ -107,42 +119,54 @@ Restrict access to the trusted **Midway Station** jump host.
 | \`sudo ufw status verbose\` | Check firewall status. |
 
 ### 2. OpenSSH User Restriction
+
 Only allow connections from specific users on the specific jump host.
 
-1.  Edit the configuration:
+1. Edit the configuration:
+
     ```bash
     sudo nano /etc/ssh/sshd_config
     ```
-2.  Add or modify the user restriction:
+
+2. Add or modify the user restriction:
+
     ```ini
     # Allowed Users
     AllowUsers $username-current-machine@$midway-station-ip
     ```
-3.  Restart SSH service:
+
+3. Restart SSH service:
+
     ```bash
     sudo systemctl restart ssh
     ```
 
 ### 3. Fail2Ban
+
 Whitelist the Midway Station IP.
 
-1.  Edit jail config:
+1. Edit jail config:
+
     ```bash
     sudo nano /etc/fail2ban/jail.local
     ```
-2.  Add whitelist:
+
+2. Add whitelist:
+
     ```ini
     [DEFAULT]
     ignoreip = 127.0.0.1/8 $midway-station-ip
     ```
-3.  Restart service:
+
+3. Restart service:
+
     ```bash
     sudo systemctl restart fail2ban && sudo systemctl status fail2ban
     ```
 
 ---
 
-# 💾 Storage: Single Drive Preparation and Mounting
+## 💾 Storage: Single Drive Preparation and Mounting
 
 **Purpose:** Procedure for securely wiping, partitioning, and permanently mounting the 1TB SSD (`sbcglocken`).
 
@@ -153,6 +177,7 @@ Whitelist the Midway Station IP.
 **Target Device:** `/dev/sdb` (Check `lsblk` to verify this is the correct device ID before running!)
 
 ### 1. Securely Wipe and Clean the Drive
+
 This step removes existing signatures and the partition table header.
 
 ```bash
@@ -164,6 +189,7 @@ sudo dd if=/dev/zero of=/dev/sdb bs=1M count=100
 ```
 
 ### 2. Partition and Format the Drive
+
 Create a **GPT** partition table and an **ext4** partition across the entire disk.
 
 ```bash
@@ -185,11 +211,14 @@ sudo mkfs.ext4 /dev/sdb1
 
 ### 1. Identify UUID and Create Mount Point
 
-1.  Check the UUID of the new partition (assuming the partition is `/dev/sdb1`):
+1. Check the UUID of the new partition (assuming the partition is `/dev/sdb1`):
+
     ```bash
     sudo blkid /dev/sdb1
     ```
-2.  Create the destination mount point:
+
+2. Create the destination mount point:
+
     ```bash
     sudo mkdir -p /drives/sbcglocken
     ```
@@ -198,17 +227,21 @@ sudo mkfs.ext4 /dev/sdb1
 
 **CRITICAL:** Use the **UUID** found from `sudo blkid` for stable mounting.
 
-1.  Edit the `fstab` configuration file:
+1. Edit the `fstab` configuration file:
+
     ```bash
     sudo nano /etc/fstab
     ```
-2.  Add the new entry (replace the UUID with the value from step 1):
+
+2. Add the new entry (replace the UUID with the value from step 1):
+
     ```fstab
     # 1TB drive mounted in /drives/sbcglocken
     UUID=bbf5b1a0-9164-433c-a7d0-592b463d316e /drives/sbcglocken ext4 defaults 0 0
     ```
 
 ### 3. Reload and Verify
+
 Reload the daemon and mount all entries listed in `fstab`.
 
 ```bash

@@ -39,13 +39,14 @@ The **Startup Delay** and **Shutdown Timeout** are crucial here to protect the R
 
 ## 💾 Ubuntu Server Installation & Initial Setup
 
-1.  **Installation:** Use the Ubuntu Server ISO with default settings (English, keyboard, mirror).
-2.  **Network:** Default (DHCP) - *Configure Static IP post-install.*
-3.  **Storage:** Guided configuration (Default).
-4.  **Profile:** Use `$username` and server name `atlantis`.
-5.  **Reboot:** Stop VM in Proxmox, remove ISO, start VM.
+1. **Installation:** Use the Ubuntu Server ISO with default settings (English, keyboard, mirror).
+2. **Network:** Default (DHCP) - *Configure Static IP post-install.*
+3. **Storage:** Guided configuration (Default).
+4. **Profile:** Use `$username` and server name `atlantis`.
+5. **Reboot:** Stop VM in Proxmox, remove ISO, start VM.
 
 ### 1. Post-Install VM Maintenance
+
 ```bash
 # Update and Clean
 sudo apt update && sudo apt upgrade -y
@@ -57,23 +58,30 @@ sudo passwd -l root
 ```
 
 ### 2. Create Directory Structure
+
 ```bash
 sudo mkdir -p /drives         # For all mounted physical drives
 sudo mkdir -p /docker/composefiles # For Docker configs
 ```
 
 ### 3. Network Configuration (Netplan)
+
 Set a static IP using Netplan.
 
-1.  Check interface name:
+1. Check interface name:
+
     ```bash
     ip a
     ```
-2.  Edit configuration:
+
+2. Edit configuration:
+
     ```bash
     sudo nano /etc/netplan/50-cloud-init.yaml
     ```
-3.  Paste configuration:
+
+3. Paste configuration:
+
     ```yaml
     network:
       version: 2
@@ -87,8 +95,11 @@ Set a static IP using Netplan.
           nameservers:
             addresses: [$prometheus-ip, 1.1.1.1]
     ```
-4.  Apply changes:
+
+4. Apply changes:
+
     ```bash
+
     sudo netplan apply
     ```
 
@@ -97,6 +108,7 @@ Set a static IP using Netplan.
 ## 🔒 Security Hardening (Firewall & SSH)
 
 ### 1. UFW Firewall
+
 Restrict access to the trusted **Midway Station** jump host.
 
 | Command | Description |
@@ -107,34 +119,46 @@ Restrict access to the trusted **Midway Station** jump host.
 | `sudo ufw status verbose` | Check firewall status. |
 
 ### 2. OpenSSH User Restriction
+
 Only allow connections from specific users on the specific jump host.
 
-1.  Edit the configuration:
+1. Edit the configuration:
+
     ```bash
     sudo nano /etc/ssh/sshd_config
     ```
-2.  Add or modify the user restriction:
+
+2. Add or modify the user restriction:
+
     ```ini
     AllowUsers $username-current-machine@$midway-station-ip
     ```
-3.  Restart SSH service:
+
+3. Restart SSH service:
+
     ```bash
     sudo systemctl restart ssh
     ```
 
 ### 3. Fail2Ban
+
 Whitelist the Midway Station IP.
 
-1.  Edit jail config:
+1. Edit jail config:
+
     ```bash
     sudo nano /etc/fail2ban/jail.local
     ```
-2.  Add whitelist:
+
+2. Add whitelist:
+
     ```ini
     [DEFAULT]
     ignoreip = 127.0.0.1/8 $midway-station-ip
     ```
-3.  Restart service:
+
+3. Restart service:
+
     ```bash
     sudo systemctl restart fail2ban && sudo systemctl status fail2ban
     ```
@@ -144,25 +168,33 @@ Whitelist the Midway Station IP.
 ## 🗄️ Storage: RAID and Single Drive Mounting
 
 ### 1. RAID 5 Volume (alfheim)
+
 This procedure assumes the RAID array was previously created on the host and passed through as individual drives (`/dev/sdc`, `/dev/sdd`, `/dev/sde`).
 
-1.  Install the RAID management tool:
+1. Install the RAID management tool:
+
     ```bash
     sudo apt update
     sudo apt install mdadm -y
     ```
-2.  Assemble the RAID array:
+
+2. Assemble the RAID array:
+
     ```bash
     sudo mdadm --assemble --scan
     # If the scan fails, assemble manually (adjust /dev/md127 as needed):
     sudo mdadm --assemble /dev/md127 /dev/sdc /dev/sdd /dev/sde
     ```
-3.  Check status:
+
+3. Check status:
+
     ```bash
     sudo mdadm --detail /dev/md127
     cat /proc/mdstat
     ```
-4.  Create mount point and mount:
+
+4. Create mount point and mount:
+
     ```bash
     sudo mkdir -p /drives/alfheim
     sudo mount /dev/md127 /drives/alfheim
@@ -170,23 +202,30 @@ This procedure assumes the RAID array was previously created on the host and pas
 
 ### 2. Single 24TB Volume (aincrad)
 
-1.  Check disk ID (assuming the partition is `/dev/sdb1`):
+1. Check disk ID (assuming the partition is `/dev/sdb1`):
+
     ```bash
     sudo blkid /dev/sdb1
     ```
-2.  Create mount point:
+
+2. Create mount point:
+
     ```bash
     sudo mkdir -p /drives/aincrad
     ```
 
 ### 3. Make Mounts Persistent (`/etc/fstab`)
+
 **CRITICAL:** Use the **UUIDs** found from `sudo blkid` for stable mounting.
 
-1.  Edit `fstab`:
+1. Edit `fstab`:
+
     ```bash
     sudo nano /etc/fstab
     ```
-2.  Add entries (replace UUIDs with your actual values):
+
+2. Add entries (replace UUIDs with your actual values):
+
     ```fstab
     # RAID 5 3x 8TB drives mounted in /drives/alfheim
     UUID=53737aa6-c4c3-47c4-8a6b-4e046468a68f /drives/alfheim ext4 defaults 0 0
@@ -194,7 +233,7 @@ This procedure assumes the RAID array was previously created on the host and pas
     # 24TB drive mounted in /drives/aincrad
     UUID=e18458e0-ef19-49cf-a9fa-5536340375ea /drives/aincrad ext4 defaults 0 0
     ```
-3.  Reload daemon and test mount all:
+
     ```bash
     sudo systemctl daemon-reload
     sudo mount -a

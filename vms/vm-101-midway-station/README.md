@@ -41,49 +41,58 @@ Specific hardware and boot settings for the Management Server.
 
 ## 💾 Ubuntu Server Installation
 
-1.  **Language:** English
-2.  **Network:** Default (DHCP) - *Configure Static IP post-install.*
-3.  **Storage:** Guided configuration (Default).
-4.  **Profile:**
+1. **Language:** English
+2. **Network:** Default (DHCP) - *Configure Static IP post-install.*
+3. **Storage:** Guided configuration (Default).
+4. **Profile:**
     * **Name:** [Your Full Name]
     * **Server Name:** `midway-station`
     * **Username:** `$username`
-5.  **SSH/Apps:** Skip "Ubuntu Pro", leave SSH unchecked (configure manually later), leave apps unchecked.
-6.  **Reboot:** Stop VM in Proxmox, remove ISO, start VM.
+5. **SSH/Apps:** Skip "Ubuntu Pro", leave SSH unchecked (configure manually later), leave apps unchecked.
+6. **Reboot:** Stop VM in Proxmox, remove ISO, start VM.
 
 ---
 
 ## ⚙️ Post-Installation Setup
 
 ### 1. Update and Clean
+
 ```bash
 sudo apt update && sudo apt upgrade -y
 sudo apt clean && sudo apt autoremove && sudo apt autoclean
 ```
 
 ### 2. User Security
+
 Disable root login for security.
 ```bash
 sudo passwd -l root
 ```
 
 ### 3. Create Directory Structure
+
 ```bash
 sudo mkdir -p /docker/portainer
 ```
 
 ### 4. Network Configuration (Netplan)
+
 Set a static IP to ensure the management server is always accessible at the same address.
 
-1.  Check interface name:
+1. Check interface name:
+
     ```bash
     ip a
     ```
-2.  Edit configuration:
+
+2. Edit configuration:
+
     ```bash
     sudo nano /etc/netplan/50-cloud-init.yaml
     ```
-3.  Paste configuration (adjust indentation carefully):
+
+3. Paste configuration (adjust indentation carefully):
+
     ```yaml
     network:
       version: 2
@@ -97,7 +106,9 @@ Set a static IP to ensure the management server is always accessible at the same
           nameservers:
             addresses: [$prometheus-ip, 1.1.1.1]
     ```
-4.  Apply changes:
+
+4. Apply changes:
+
     ```bash
     sudo netplan apply
     ```
@@ -107,6 +118,7 @@ Set a static IP to ensure the management server is always accessible at the same
 ## 🛡️ Security Hardening (Firewall & Fail2Ban)
 
 ### 1. UFW Firewall
+
 Allow SSH only from the local LAN.
 
 | Command | Description |
@@ -117,18 +129,24 @@ Allow SSH only from the local LAN.
 | `sudo ufw status verbose` | Verify rules. |
 
 ### 2. Fail2Ban
+
 Prevent brute-force attacks by ignoring the local network.
 
-1.  Edit jail config:
+1. Edit jail config:
+
     ```bash
     sudo nano /etc/fail2ban/jail.local
     ```
-2.  Add whitelist:
+
+2. Add whitelist:
+
     ```ini
     [DEFAULT]
     ignoreip = 127.0.0.1/8 $lan-ip/24
     ```
-3.  Restart service:
+
+3. Restart service:
+
     ```bash
     sudo systemctl restart fail2ban && sudo systemctl status fail2ban
     ```
@@ -138,9 +156,11 @@ Prevent brute-force attacks by ignoring the local network.
 ## 🐳 Docker & Portainer Setup
 
 ### 1. Install Docker Engine
+
 Reference: [Docker Install Guide](https://docs.docker.com/engine/install/ubuntu/) </br>
-My own document: [🐳 Docker Engine Installation](https://github.com/exparsioz/Home-network/blob/main/General/%F0%9F%90%B3%20Docker%20Engine%20Installation.md) </br>
+My own document:
 
 ### 2. Install Portainer (Container Management)
+
 Reference: [Portainer Install Guide](https://docs.portainer.io/start/install-ce/server/docker/linux) </br>
-My own document: [🤖 Portainer with Docker Compose](https://github.com/exparsioz/Home-network/blob/main/VM101%20midway-station/composefiles/Portainer%20with%20Docker%20Compose.md) </br>
+My own document:

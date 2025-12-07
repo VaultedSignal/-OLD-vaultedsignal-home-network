@@ -10,6 +10,7 @@
 ## 🛠️ Part 1: SSH Server Installation and Basic Setup
 
 ### 1. Install and Enable OpenSSH
+
 Update repositories and install the server package.
 
 ```bash
@@ -20,9 +21,10 @@ sudo systemctl status ssh       # Verify status
 ```
 
 ### 2. Configure SSH Warning Banner
+
 Create a banner to display legal warnings to anyone attempting to connect.
 
-1.  Create the banner file:
+1.Create the banner file:
     ```bash
     sudo nano /etc/ssh/ssh_banner
     ```
@@ -35,6 +37,7 @@ Create a banner to display legal warnings to anyone attempting to connect.
 3.  Save and exit.
 
 ### 3. Modify `sshd_config` Basics
+
 Edit the main configuration file to apply basic security and the banner.
 
 ```bash
@@ -47,7 +50,7 @@ sudo nano /etc/ssh/sshd_config
 | `PrintLastLog` | Uncomment & set to `yes` | Shows the last login timestamp when you connect. |
 | `Banner` | Uncomment & set to `/etc/ssh/ssh_banner` | Displays the warning file created above. |
 
-4.  Restart SSH to apply changes:
+4.Restart SSH to apply changes:
     ```bash
     sudo systemctl restart ssh
     ```
@@ -61,6 +64,7 @@ Setup keys on your local machine (Windows or Linux) to connect without passwords
 ### 1. Generate SSH Keys
 
 **Option A: Windows (PowerShell)**
+
 ```powershell
 # Create directory structure
 New-Item -ItemType Directory -Force -Path "C:\Users\$env:USERNAME\.ssh\$hostname_target"
@@ -70,12 +74,14 @@ ssh-keygen -t ed25519 -C "$hostname-target" -f "C:\Users\$env:USERNAME\.ssh\$hos
 ```
 
 **Option B: Linux**
+
 ```bash
 mkdir -p "$HOME/.ssh/$hostname_target"
 ssh-keygen -t ed25519 -C "$hostname_target" -f "$HOME/.ssh/$hostname_target/$hostname_target"
 ```
 
 ### 2. Configure SSH Shortcut (config file)
+
 This allows you to type `ssh target-name` instead of the full user/IP command.
 
 **Windows:** `C:\Users\$username\.ssh\config`
@@ -99,21 +105,26 @@ Host $target-hostname
 Configure the target server to accept the keys and disable passwords.
 
 ### 1. Install Public Key
+
 Copy the content of your **public key** (ending in `.pub`) from your client machine.
 
-1.  On the server, open the authorized keys file:
+1. On the server, open the authorized keys file:
+
     ```bash
     mkdir -p ~/.ssh
     sudo nano ~/.ssh/authorized_keys
     ```
-2.  Paste the public key (one key per line).
-3.  **Important:** Set correct permissions (SSH is strict about this):
+
+2. Paste the public key (one key per line).
+3. **Important:** Set correct permissions (SSH is strict about this):
+
     ```bash
     chmod 700 ~/.ssh
     chmod 600 ~/.ssh/authorized_keys
     ```
 
 ### 2. Enforce Key-Only Authentication
+
 Once you have verified your key works, disable password logins for security.
 
 ```bash
@@ -127,7 +138,8 @@ sudo nano /etc/ssh/sshd_config
 | `PasswordAuthentication` | Uncomment & set to `no` | **Disables** password logins (Security Risk if keys aren't working). |
 | `KbdInteractiveAuthentication` | Uncomment & set to `no` | Disables keyboard interactive prompts. |
 
-3.  Restart SSH:
+1. Restart SSH:
+
     ```bash
     sudo systemctl restart ssh
     ```
@@ -139,12 +151,14 @@ sudo nano /etc/ssh/sshd_config
 Install Fail2Ban to ban IPs that show malicious behavior (brute force attempts).
 
 ### 1. Install and Enable
+
 ```bash
 sudo apt install fail2ban -y
 sudo systemctl enable --now fail2ban
 ```
 
 ### 2. Configure Jail (Local Config)
+
 Never edit `.conf` files; always copy to `.local`.
 
 ```bash
@@ -168,11 +182,13 @@ findtime = 10m     # Count failures within a 10 minute window
 ```
 
 ### 3. Restart and Verify
+
 ```bash
 sudo systemctl restart fail2ban
 sudo systemctl status fail2ban
 ```
 
 **Useful Commands:**
+
 * Check banned IPs: `sudo fail2ban-client status sshd`
 * Unban an IP: `sudo fail2ban-client set sshd unbanip XXX.XXX.XXX.XXX`
