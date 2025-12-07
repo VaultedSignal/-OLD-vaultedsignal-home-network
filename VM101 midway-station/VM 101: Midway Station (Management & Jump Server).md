@@ -143,19 +143,4 @@ My own document: [🐳 Docker Engine Installation](https://github.com/exparsioz/
 
 ### 2. Install Portainer (Container Management)
 Reference: [Portainer Install Guide](https://docs.portainer.io/start/install-ce/server/docker/linux) </br>
-My own document: [🐳 Portainer with Docker Compose](https://github.com/exparsioz/Home-network/blob/main/VM101%20midway-station/composefiles/Portainer%20with%20Docker%20Compose.md) </br>
-
-**Quick Setup:**
-1.  Navigate to the directory:
-    ```bash
-    cd /docker/portainer
-    ```
-2.  Create the Compose file:
-    ```bash
-    sudo nano portainer-compose.yaml
-    ```
-3.  *Paste the Portainer compose content here (usually defines the image `portainer/portainer-ce:latest`, ports `9443:9443`, and volumes).*
-4.  Run the container:
-    ```bash
-    docker compose -f portainer-compose.yaml up -d
-    ```
+My own document: [🤖 Portainer with Docker Compose](https://github.com/exparsioz/Home-network/blob/main/VM101%20midway-station/composefiles/Portainer%20with%20Docker%20Compose.md) </br>
