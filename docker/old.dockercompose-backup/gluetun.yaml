@@ -13,8 +13,8 @@ services:
       - PGID=1000
       - VPN_SERVICE_PROVIDER=nordvpn
       - VPN_TYPE=openvpn
-      - OPENVPN_USER=Lpc8FjMND5HTmEg5pJ7HKa3x
-      - OPENVPN_PASSWORD=mmssMbjFzWdJFdxeisWzHTqD
+      - OPENVPN_USER=$nordvpnusr
+      - OPENVPN_PASSWORD=$nordvpnpasswd
       - UPDATER_PERIOD=24h
       - TZ=Europe/Amsterdam
     ports:
