@@ -19,12 +19,12 @@ The **Startup Delay** and **Shutdown Timeout** are crucial here to protect the R
 | | Type | Linux | |
 | **System** | Machine | `q35` | |
 | | SCSI Controller | `VirtIO SCSI single` | |
-| **Disk** | Size | `32 GB` | OS Drive |
+| **Disk** | Size | `128 GB` | OS Drive |
 | | Cache | `Write through` | |
 | | Discard | **Checked** | |
 | **CPU** | Sockets/Cores | 1 Socket / 2 Cores | |
 | | Type | `host` | |
-| **Memory** | RAM | `4096 MB` | |
+| **Memory** | RAM | `16384 MB` | |
 
 ### Options (Boot/Shutdown)
 

@@ -1,0 +1,190 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN #Gives gluetun the necessary permissions to manage VPN connections
+    devices:
+      - /dev/net/tun:/dev/net/tun
+
+    # IMPORTANT: These are the ports to access the web UIs from your laptop.
+    # The format is HOST_PORT:CONTAINER_PORT
+    ports:
+      # qBittorrent Web UI (default 8080)
+      - "8080:8080/"
+      # Prowlarr Web UI (default 9696)
+      - "9696:9696/"
+      # Sonarr Web UI (default 8989)
+      - "8989:8989"
+      # Sonarr-Anime Web UI (using host port 8990 to avoid conflict)
+      - "8990:8989"
+      # Radarr Web UI (default 7878)
+      - "7878:7878"
+      # Radarr-Anime Web UI (using host port 7879 to avoid conflict)
+      - "7879:7878"
+      # Huntarr Web UI (default 8686 - note: Huntarr is not official, confirm port if different)
+      - "8686:8686"
+      # Cleanuparr Web UI (default 5050 - if it has one, adjust port if different)
+      - "5050:5050"
+
+    environment:
+      # --- VPN CONFIGURATION (NordVPN) ---
+      - VPN_SERVICE_PROVIDER=nordvpn
+      - VPN_TYPE=openvpn # VPN provider
+      - OPENVPN_USER=$nordvpnuser
+      - OPENVPN_PASSWORD=$nordvpnpasswd
+      - SERVER_COUNTRIES=Poland # Optional: Restrict to a specific country
+      - TZ=Europe/Amsterdam
+
+      # Recommended for NordVPN and P2P traffic
+      - NORDVPN_PROTOCOL=tcp
+
+      # Optional: Add local network so the *arr apps can talk to other non-VPN services (e.g., NAS, reverse proxy)
+      - FIREWALL_OUTBOUND_SUBNETS=$lanip/24 # REPLACE with local subnet
+
+    volumes:
+      - /docker/gluetun:/gluetun
+    restart: unless-stopped
+
+  # ---
+  # Client Containers (Behind the VPN)
+  # ---
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    # CRUCIAL: Routes all traffic through the 'gluetun' container's network stack
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+      - WEBUI_PORT=8080
+    volumes:
+      - /docker/qbittorrent/config:/config
+      - /drives/theseed/downloads/incomplete:/incomplete # incomplete downloads are here
+      - /drives/theseed/downloads/complete:/complete # complete downloads are here for the arr stack
+      - /drives/theseed/torrents:/torrents # auto add torrents from this folder
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+    volumes:
+      - /docker/prowlarr/config:/config
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    # The *arr apps only need to communicate with Prowlarr and qBittorrent, which are
+    # on the same 'service:gluetun' network, securing their indexer/download traffic.
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+    volumes:
+      - /docker/sonarr/config:/config
+      - /drives/alfheim/tv-shows:/tv-shows
+      - /drives/theseed/downloads/complete:/complete
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    restart: unless-stopped
+
+  sonarr-anime:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr-anime
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+      - PORT=8989 # The internal port is the same, but the host port is different (8990)
+    volumes:
+      - /docker/sonarr-anime/config:/config # Separate config for separate instance
+      - /drives/aincrad/anime-shows:/anime-shows
+      - /drives/theseed/downloads/complete:/complete
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+    volumes:
+      - /docker/radarr/config:/config
+      - /drives/alfheim/movies:/movies
+      - /drives/theseed/downloads/complete:/complete
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    restart: unless-stopped
+
+  radarr-anime:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr-anime
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+      - PORT=7878 # The internal port is the same, but the host port is different (7879)
+    volumes:
+      - /docker/radarr-anime/config:/config # Separate config for separate instance
+      - /drives/aincrad/anime-movies:/anime-movies
+      - /drives/theseed/downloads/complete:/complete
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    restart: unless-stopped
+
+  huntarr:
+    image: ghcr.io/plexguide/huntarr:latest
+    container_name: huntarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+      - PORT=8686 # Default is often 8686
+    volumes:
+      - /docker/huntarr/config:/config
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    restart: unless-stopped
+
+  cleanuparr:
+    image: ghcr.io/cleanuparr/cleanuparr:latest
+    container_name: cleanuparr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+      - PORT=5050 # Default is often 5050
+    volumes:
+      - /docker/cleanuparr/config:/config
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    restart: unless-stopped
