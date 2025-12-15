@@ -1,179 +1,743 @@
-# 🐧 Ubuntu VM Template: Creation and Hardening
+# Ubuntu VM Template Creation & Hardening
 
-**Author:** VaultedSignal
-**Date:** 06-12-2025
-**Purpose:** A standardized, secure process for provisioning a new Ubuntu Server VM on Proxmox, including initial setup, networking, and SSH hardening.
+Standardized process for creating secure, production-ready Ubuntu Server virtual machines on Proxmox.
+
+## Overview
+
+This guide provides a repeatable process for deploying hardened Ubuntu Server VMs on Proxmox VE. Following these steps ensures consistent configuration, proper security hardening, and integration with your network infrastructure including jump host access control.
+
+## Why Use VM Templates?
+
+- 🚀 **Rapid Deployment**: Spin up new VMs in minutes
+- 🔒 **Consistent Security**: Every VM starts with the same hardening
+- 📋 **Standardization**: Uniform configuration across infrastructure
+- 🔄 **Repeatability**: Documented, tested deployment process
+- 🛡️ **Defense in Depth**: Multiple security layers from the start
+
+## Technology Stack
+
+- **Hypervisor**: Proxmox VE
+- **Operating System**: Ubuntu Server (Latest LTS recommended)
+- **Network**: Netplan for static IP configuration
+- **Security**: UFW, Fail2Ban, SSH hardening
+- **Jump Host**: Midway Station for controlled access
+
+## VM Creation Checklist
+
+- [ ] VM created in Proxmox with proper settings
+- [ ] Ubuntu Server installed
+- [ ] Initial user created
+- [ ] System updated
+- [ ] Static IP configured
+- [ ] Directory structure created
+- [ ] Root login disabled
+- [ ] UFW firewall configured
+- [ ] SSH hardened with jump host restriction
+- [ ] Fail2Ban configured
+- [ ] Documentation updated
+- [ ] Tested from jump host
+
+## Part 1: Proxmox VM Creation
+
+### VM Hardware Configuration
+
+Create a new VM in Proxmox with these recommended settings:
+
+#### General Tab
+
+| Setting | Value | Notes |
+|---------|-------|-------|
+| **VM ID** | Next available (e.g., 105) | Use sequential numbering |
+| **Name** | Descriptive name | Example: `atlantis`, `orion`, `prometheus` |
+| **Resource Pool** | (Optional) | Group related VMs |
+
+#### OS Tab
+
+| Setting | Value | Notes |
+|---------|-------|-------|
+| **ISO Image** | Ubuntu Server (latest LTS) | Download from Ubuntu.com |
+| **Guest OS Type** | Linux | |
+| **Version** | 6.x - 2.6 Kernel | Default for Ubuntu |
+
+#### System Tab
+
+| Setting | Value | Notes |
+|---------|-------|-------|
+| **Machine** | q35 | Modern, recommended |
+| **BIOS** | SeaBIOS | Compatible with most systems |
+| **SCSI Controller** | **VirtIO SCSI single** | Best performance and stability |
+| **Qemu Agent** | Enabled | Recommended for better management |
+
+#### Disks Tab
+
+| Setting | Value | Notes |
+|---------|-------|-------|
+| **Bus/Device** | SCSI 0 | Using VirtIO SCSI |
+| **Storage** | local-lvm (or your storage) | |
+| **Disk Size** | 32 GB minimum | 50-100 GB recommended |
+| **Cache** | Write through | Balance of performance/safety |
+| **Discard** | ✓ Enabled | Important for SSD TRIM support |
+| **SSD Emulation** | ✓ If on SSD storage | Enables TRIM in guest |
+
+#### CPU Tab
+
+| Setting | Value | Notes |
+|---------|-------|-------|
+| **Sockets** | 1 | Single socket recommended |
+| **Cores** | 2-4 | Start with 2, increase as needed |
+| **Type** | **host** | Uses host CPU features for best performance |
+
+**Alternative CPU Types**:
+
+- `x86-64-v2-AES` - Good compatibility and security
+- `kvm64` - Maximum compatibility
+
+#### Memory Tab
+
+| Setting | Value | Notes |
+|---------|-------|-------|
+| **Memory (MiB)** | 4096 (4 GB) | Minimum for Ubuntu Server |
+| **Ballooning** | Enabled | Allows dynamic memory adjustment |
+
+**Recommended memory by use case**:
+
+- Minimal server: 2048 MB (2 GB)
+- Standard server: 4096 MB (4 GB)
+- Docker host: 8192 MB (8 GB)
+- Database server: 16384 MB (16 GB)
+
+#### Network Tab
+
+| Setting | Value | Notes |
+|---------|-------|-------|
+| **Bridge** | vmbr0 | Default bridge |
+| **Model** | VirtIO (paravirtualized) | Best performance |
+| **Firewall** | Optional | Can use Proxmox firewall |
+
+### VM Options Configuration
+
+After creating the VM, configure additional options:
+
+**Navigate to**: VM > Options
+
+| Option | Setting | Purpose |
+|--------|---------|---------|
+| **Start at boot** | Yes (✓) | VM starts automatically with Proxmox |
+| **Start/Shutdown order** | Assign order number | Control startup sequence |
+| **Startup delay** | 0-30 seconds | Wait time before starting (if dependencies exist) |
+| **Shutdown timeout** | 60 seconds | Grace period before force shutdown |
+
+**Startup Order Guidelines**:
+
+1. **Order 1**: DNS/DHCP servers (Prometheus/Pi-hole)
+2. **Order 2**: Storage/NAS servers
+3. **Order 3**: Infrastructure services (Portainer, reverse proxy)
+4. **Order 4+**: Application servers
+
+**Example configuration**:
+
+```txt
+Prometheus (DNS): order=1, delay=0
+Atlantis (Media): order=3, delay=10
+Orion (Downloads): order=4, delay=5
+```
+
+## Part 2: Ubuntu Server Installation
+
+### Installation Process
+
+1. **Start the VM** and access the console
+2. **Select language**: English
+3. **Select keyboard layout**: English (US) or your preference
+4. **Installation type**: Ubuntu Server (not minimal)
+5. **Network configuration**:
+   - Accept DHCP for now (we'll configure static IP later)
+   - Note the assigned IP address
+
+6. **Proxy configuration**: Leave blank (unless you use a proxy)
+7. **Mirror configuration**: Use default Ubuntu archive mirror
+8. **Storage configuration**:
+   - Select **"Use an entire disk"**
+   - Choose **"Set up this disk as an LVM group"**
+   - Review and confirm (will erase disk)
+
+9. **Profile setup**:
+   - **Your name**: Admin or your name
+   - **Server name**: Hostname (e.g., `atlantis`, `orion`)
+   - **Username**: Your admin username
+   - **Password**: Strong password (min 12 characters)
+
+10. **Ubuntu Pro**: Skip (not required for home use)
+11. **SSH Setup**: ✓ **Install OpenSSH server**
+12. **Featured Server Snaps**: Leave all unchecked
+13. **Installation**: Wait for completion
+14. **Reboot**: When prompted
+
+### Post-Installation Cleanup
+
+After reboot and first login:
+
+```bash
+# Remove CD/DVD drive in Proxmox
+# Navigate to: VM > Hardware > CD/DVD Drive > Remove
+```
+
+Or via command line on Proxmox host:
+
+```bash
+qm set <VM_ID> --delete ide2
+```
+
+## Part 3: Initial Configuration
+
+### Create Directory Structure
+
+Establish standard directory layout:
+
+```bash
+# Create mount points for data drives
+sudo mkdir -p /drives
+
+# Create Docker directories
+sudo mkdir -p /docker/composefiles
+
+# Create backup directory
+sudo mkdir -p /backups
+
+# Set proper ownership
+
+```bash
+sudo chown -R $USER:$USER /docker
+```
+
+**Standard directory structure**:
+
+```txt
+/
+├── drives/              # Mount point for additional disks
+│   ├── storage1/
+│   └── storage2/
+├── docker/              # Docker-related files
+│   ├── composefiles/   # Docker Compose files
+│   ├── appname/        # Per-application data
+│   └── volumes/        # Docker volumes
+└── backups/            # Local backups
+```
+
+### Disable Root Login
+
+Lock the root account to prevent direct login:
+
+```bash
+# Check current root status
+sudo passwd -S root
+
+# Lock root account (prevents password login)
+sudo passwd -l root
+
+# Verify root is locked (should show "root L")
+sudo passwd -S root
+```
+
+**Note**: Root can still be accessed via `sudo su -` by authorized users.
+
+### System Updates
+
+Apply all available updates:
+
+```bash
+# Update package lists
+sudo apt update
+
+# Upgrade all packages
+sudo apt upgrade -y
+
+# Upgrade distribution (if needed)
+sudo apt full-upgrade -y
+
+# Install useful utilities
+sudo apt install -y \
+    vim \
+    htop \
+    net-tools \
+    curl \
+    wget \
+    git \
+    screen \
+    tmux \
+    ncdu
+
+# Clean up
+sudo apt clean
+sudo apt autoremove -y
+sudo apt autoclean
+
+# Reboot to apply kernel updates
+sudo reboot
+```
+
+## Part 4: Network Configuration
+
+### Configure Static IP with Netplan
+
+Ubuntu Server uses Netplan for network configuration.
+
+#### Identify Network Interface
+
+```bash
+# List network interfaces
+ip addr show
+
+# Or use shorter command
+ip a
+```
+
+**Common interface names**:
+
+- `ens18` - Common in Proxmox VMs
+- `enp6s18` - PCIe-based naming
+- `eth0` - Legacy naming
+
+#### Edit Netplan Configuration
+
+```bash
+# Backup original configuration
+sudo cp /etc/netplan/50-cloud-init.yaml /etc/netplan/50-cloud-init.yaml.bak
+
+# Edit configuration
+sudo nano /etc/netplan/50-cloud-init.yaml
+```
+
+**Configuration template**:
+
+```yaml
+network:
+  version: 2
+  ethernets:
+    ens18:  # Replace with your interface name
+      dhcp4: no
+      addresses: 
+        - 192.168.1.102/24  # Static IP with subnet mask
+      routes:
+        - to: default
+          via: 192.168.1.1  # Gateway (router) IP
+      nameservers:
+        addresses:
+          - 192.168.1.999   # Primary DNS (Pi-hole/Prometheus)
+          - 1.1.1.1         # Secondary DNS (Cloudflare)
+          - 1.0.0.1         # Tertiary DNS (Cloudflare)
+```
+
+**Multiple DNS example**:
+
+```yaml
+      nameservers:
+        addresses:
+          - 192.168.1.999   # Pi-hole
+          - 8.8.8.8         # Google DNS
+          - 1.1.1.1         # Cloudflare DNS
+        search:
+          - local           # Local domain suffix
+```
+
+#### Apply Network Configuration
+
+```bash
+# Test configuration syntax
+sudo netplan try
+
+# If successful, press Enter to accept
+# Configuration will auto-revert if you lose connection
+
+# Apply permanently
+sudo netplan apply
+
+# Verify new configuration
+ip addr show
+ping -c 4 1.1.1.1
+ping -c 4 google.com
+```
+
+#### Troubleshooting Network Issues
+
+```bash
+# Check netplan configuration syntax
+sudo netplan --debug apply
+
+# View current configuration
+sudo netplan get
+
+# Restart networking service
+sudo systemctl restart systemd-networkd
+
+# Check DNS resolution
+resolvectl status
+
+# Test specific DNS server
+nslookup google.com 1.1.1.1
+```
+
+## Part 5: SSH & Security Hardening
+
+### UFW Firewall Configuration
+
+Restrict SSH access to jump host only:
+
+```bash
+# Install UFW if not present
+sudo apt install ufw -y
+
+# Set default policies
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+# Allow SSH from Midway Station (jump host) only
+sudo ufw allow from 192.168.1.50 to any port 22 proto tcp
+
+# Explicitly deny all other SSH connections
+sudo ufw deny 22/tcp
+
+# Enable firewall
+sudo ufw enable
+
+# Verify configuration
+sudo ufw status verbose
+```
+
+**Expected output**:
+
+```txt
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW IN    192.168.1.50
+22/tcp                     DENY IN     Anywhere
+```
+
+### SSH Configuration Hardening
+
+Restrict SSH access by user and source IP:
+
+```bash
+# Backup original configuration
+sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+
+# Edit SSH configuration
+sudo nano /etc/ssh/sshd_config
+```
+
+**Add or modify these settings**:
+
+```ssh-config
+# Restrict SSH access to specific user from specific IP
+AllowUsers admin@192.168.1.50
+
+# Or restrict by group
+# AllowGroups ssh-users
+
+# Additional hardening
+PermitRootLogin no
+PasswordAuthentication no  # After SSH keys are set up
+PubkeyAuthentication yes
+MaxAuthTries 3
+ClientAliveInterval 300
+ClientAliveCountMax 2
+```
+
+**Test and apply**:
+
+```bash
+# Test configuration for errors
+sudo sshd -t
+
+# Restart SSH service
+sudo systemctl restart ssh
+
+# Verify service is running
+sudo systemctl status ssh
+```
+
+### Fail2Ban Configuration
+
+Configure Fail2Ban to ignore jump host:
+
+```bash
+# Install Fail2Ban
+sudo apt install fail2ban -y
+
+# Create local configuration
+sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+
+# Edit configuration
+sudo nano /etc/fail2ban/jail.local
+```
+
+**Add to [DEFAULT] section**:
+
+```ini
+[DEFAULT]
+# Whitelist jump host and localhost
+ignoreip = 127.0.0.1/8 ::1 192.168.1.50
+
+# Ban settings
+bantime = 1h
+findtime = 10m
+maxretry = 3
+```
+
+**Enable SSH jail**:
+
+```ini
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 3
+```
+
+**Apply configuration**:
+
+```bash
+# Enable and start Fail2Ban
+sudo systemctl enable --now fail2ban
+
+# Verify status
+sudo systemctl status fail2ban
+
+# Check active jails
+sudo fail2ban-client status
+
+# Check SSH jail specifically
+sudo fail2ban-client status sshd
+```
+
+## Part 6: Additional Security Measures
+
+### Install and Configure Automatic Updates
+
+```bash
+# Install unattended-upgrades
+sudo apt install unattended-upgrades -y
+
+# Configure automatic updates
+sudo dpkg-reconfigure -plow unattended-upgrades
+
+# Edit configuration for more control (optional)
+sudo nano /etc/apt/apt.conf.d/50unattended-upgrades
+```
+
+### Enable QEMU Guest Agent
+
+Improves integration with Proxmox:
+
+```bash
+# Install QEMU guest agent
+sudo apt install qemu-guest-agent -y
+
+# Enable and start service
+sudo systemctl enable --now qemu-guest-agent
+
+# Verify status
+sudo systemctl status qemu-guest-agent
+```
+
+In Proxmox, enable the agent:
+
+```bash
+# On Proxmox host
+qm set <VM_ID> --agent 1
+```
+
+### Configure Timezone
+
+```bash
+# List available timezones
+timedatectl list-timezones
+
+# Set timezone
+sudo timedatectl set-timezone Europe/Amsterdam
+
+# Verify
+timedatectl
+```
+
+### Set Hostname (if needed)
+
+```bash
+# Change hostname
+sudo hostnamectl set-hostname new-hostname
+
+# Edit hosts file
+sudo nano /etc/hosts
+
+# Update line:
+127.0.1.1    new-hostname
+
+# Verify
+hostnamectl
+```
+
+## Verification & Testing
+
+### System Verification
+
+```bash
+# Check system information
+hostnamectl
+
+# Check network configuration
+ip addr show
+ip route show
+
+# Check DNS resolution
+resolvectl status
+nslookup google.com
+
+# Check SSH configuration
+sudo sshd -t
+
+# Check firewall status
+sudo ufw status verbose
+
+# Check Fail2Ban
+sudo fail2ban-client status
+```
+
+### Security Testing
+
+```bash
+# Test SSH from jump host (should work)
+# From Midway Station:
+ssh admin@target-vm-ip
+
+# Test SSH from other IP (should fail)
+# From different machine:
+ssh admin@target-vm-ip
+# Should be blocked by UFW
+
+# Check authentication logs
+sudo tail -f /var/log/auth.log
+
+# Check UFW logs
+sudo tail -f /var/log/ufw.log
+```
+
+### Performance Check
+
+```bash
+# View system resources
+htop
+
+# Check disk usage
+df -h
+
+# Check disk I/O
+iostat -x 1
+
+# Network throughput test
+iperf3 -c <server-ip>  # Requires iperf3 on both ends
+```
+
+## Creating a VM Template (Optional)
+
+Convert this VM into a reusable template:
+
+```bash
+# On Proxmox host
+# First, clean up the VM
+qm shutdown <VM_ID>
+
+# Wait for shutdown, then convert to template
+qm template <VM_ID>
+```
+
+**Before creating template**:
+
+1. Remove machine-specific data:
+
+   ```bash
+   # Inside VM before shutdown
+   sudo cloud-init clean
+   sudo rm -f /etc/ssh/ssh_host_*
+   sudo truncate -s 0 /etc/machine-id
+   sudo rm /var/lib/dbus/machine-id
+   sudo ln -s /etc/machine-id /var/lib/dbus/machine-id
+   ```
+
+2. Clear logs and history:
+
+   ```bash
+   sudo apt clean
+   history -c
+   ```
+
+**Clone from template**:
+
+```bash
+# On Proxmox host
+qm clone <TEMPLATE_ID> <NEW_VM_ID> --name new-vm-name --full
+```
+
+## Troubleshooting
+
+**Cannot SSH from jump host?**
+
+- Verify UFW allows jump host IP: `sudo ufw status`
+- Check SSH is running: `sudo systemctl status ssh`
+- Verify AllowUsers setting: `sudo grep AllowUsers /etc/ssh/sshd_config`
+- Check authentication logs: `sudo tail /var/log/auth.log`
+
+**Network not working after static IP?**
+
+- Verify netplan syntax: `sudo netplan try`
+- Check interface name is correct: `ip a`
+- Verify gateway is reachable: `ping 192.168.1.1`
+- Check DNS resolution: `nslookup google.com`
+
+**UFW blocking legitimate traffic?**
+
+- Check UFW logs: `sudo tail /var/log/ufw.log`
+- Temporarily disable for testing: `sudo ufw disable`
+- Verify rules: `sudo ufw status numbered`
+
+**QEMU agent not working?**
+
+- Verify installed: `systemctl status qemu-guest-agent`
+- Check Proxmox side: VM > Options > QEMU Guest Agent
+- Restart VM after enabling agent option
+
+## Best Practices
+
+1. **Document everything**: Keep notes on IP addresses, credentials, configurations
+2. **Test thoroughly**: Verify each step before proceeding
+3. **Keep backups**: Snapshot before major changes
+4. **Use templates**: Create templates for common configurations
+5. **Regular updates**: Schedule weekly update checks
+6. **Monitor logs**: Review authentication and firewall logs regularly
+7. **Least privilege**: Only open necessary ports and access
+8. **Strong passwords**: Use complex, unique passwords for each VM
+9. **SSH keys**: Implement key-based authentication (see SSH Hardening guide)
+10. **Jump host model**: Always access VMs through trusted jump host
+
+## Next Steps
+
+After VM creation and hardening:
+
+1. **Install Docker** (if needed) - see Docker Installation guide
+2. **Deploy applications** - Install your services
+3. **Set up monitoring** - Implement logging and metrics
+4. **Configure backups** - Establish backup procedures
+5. **Document VM** - Note purpose, services, ports, access methods
+6. **Add to inventory** - Update infrastructure documentation
+
+## References
+
+- [Ubuntu Server Documentation](https://ubuntu.com/server/docs)
+- [Netplan Documentation](https://netplan.io/)
+- [UFW Guide](https://help.ubuntu.com/community/UFW)
+- [Proxmox VE Documentation](https://pve.proxmox.com/wiki/Main_Page)
+- [Linux Hardening Guide](https://github.com/imthenachoman/How-To-Secure-A-Linux-Server)
 
 ---
 
-## 🛠️ Proxmox VM Creation Steps (WebUI)
-
-These settings define the VM's hardware and boot configuration before the OS installation.
-
-| Section | Parameter | Recommended Value / Action | Notes |
-| :--- | :--- | :--- | :--- |
-| **General** | VM ID / Name | Fill in what is needed | Use a clear naming convention (e.g., VM105-NewServer) |
-| **OS** | ISO Image / Type | Ubuntu Server / Linux | Select the appropriate Ubuntu Server ISO |
-| **System** | GPU | Default | Unless a specific need for graphics passthrough |
-| | Machine / BIOS | q35 / SeaBIOS | Standard, modern settings |
-| | SCSI Controller | **VirtIO SCSI single** | Recommended for performance and stability |
-| **Disk** | Disk Size | Fill in what is needed | Standard OS disk (e.g., 32GB) |
-| | Cache | Write Through | Good balance of performance and data safety |
-| | Discard | Checked | Enables TRIM/Discard for better SSD lifespan |
-| **CPU** | Sockets / Cores | Fill in what is needed | Start with 1 Socket / 2 Cores |
-| | Type | **host** | Use host CPU features for best performance |
-| **Memory** | Memory (RAM) | Fill in what is needed | Start with 4096 MB |
-| **Network** | Network Bridge | Leave as is (VirtIO) | Use the default configured bridge |
-
-### Proxmox Host Settings (Options)
-
-| Option | Setting | Value / Action | Rationale |
-| :--- | :--- | :--- | :--- |
-| Start at boot | Yes | Check | Ensure VM boots with the host |
-| Start/Shutdown order | Next one up | Ascending startup, descending shutdown | **Crucial:** Order 1 (DNS/Prometheus) must be first. |
-| Startup delay | If needed | Waits X seconds before starting the next VM in the order | Use for VMs dependent on others (e.g., NAS storage) |
-| Shutdown timeout | If needed | Waits X seconds after shutdown command before force-killing | Use for VMs with high data integrity needs (e.g., NAS) |
-
----
-
-## 💾 Ubuntu Server Installation
-
-1. **Language / Keyboard:** English / Default.
-2. **Installation Base:** Ubuntu Server.
-3. **Network Configuration:** Default (DHCP) — **Fix later with static IP.**
-4. **Proxy / Mirror:** Blank / Default.
-5. **Storage:** Guided configuration, default (destroying data). **Add extra drives later.**
-6. **Profile:** Fill in user name, server name (`$servername`), and password.
-7. **Ubuntu Pro / SSH / Apps:** Skip Pro, **check** SSH, All Apps **Unchecked**.
-8. Wait for the installation to finish and reboot.
-9. In Proxmox, **stop the VM**, **remove the CD drive**, and start the VM again.
-
----
-
-## ⚙️ Post-Installation Configuration
-
-### 1. Initial Setup and User Management
-
-1. **Create Directories:**
-
-    ```bash
-    mkdir /drives # For all mounted data drives
-    mkdir /docker # For all docker related stuff
-    mkdir /docker/composefiles # For compose.yaml files
-    ```
-
-2. **Disable Root Local Login:**
-
-    ```bash
-    sudo passwd -S root # Check if root is locked ("root L" means locked)
-    sudo passwd -l root # Locks the root account if it is not locked already
-    ```
-
-3. **Update VM:**
-
-    ```bash
-    sudo apt update && sudo apt upgrade -y # Search for and install updates
-    sudo apt clean && sudo apt autoremove && sudo apt autoclean # Remove old files
-    reboot now
-    ```
-
-### 2. Set Static IP (Netplan)
-
-This uses **Netplan** to set a permanent static IP address.
-
-1. Identify the correct network interface name:
-
-    ```bash
-    ip a
-    ```
-
-2. Edit the Netplan configuration file:
-
-    ```bash
-    sudo nano /etc/netplan/50-cloud-init.yaml
-    ```
-
-3. Apply the following structure (replacing `enp6s18` with your interface name):
-
-    ```yaml
-    network:
-      version: 2
-      ethernets:
-        enp6s18:
-          dhcp4: no
-          addresses: [XXX.XXX.XXX.XXX/24] # Static IP and subnet mask
-          routes:
-            - to: default
-              via: $modem-ip # Modem/Router IP address
-          nameservers:
-            addresses: [$prometheus-ip, 1.1.1.1] # Primary DNS (Pi-hole), Secondary DNS
-    ```
-
-4. Apply the new network settings:
-
-    ```bash
-    sudo netplan apply
-    ```
-
----
-
-## 🛡️ SSH and Security Hardening
-
-Implement security measures to restrict access to trusted hosts.
-
-### 1. UFW Firewall Configuration
-
-Restrict inbound access to only the trusted **Midway Station** jump host.
-
-| Command | Port/Action | Description |
-| :--- | :--- | :--- |
-| `sudo ufw allow from $midway-station-ip to any port 22 proto tcp` | SSH (22/tcp) | Explicitly allows SSH access ONLY from the Midway Station IP. |
-| `sudo ufw deny 22/tcp` | SSH (22/tcp) | Blocks all other SSH connections. |
-| `sudo ufw enable` | N/A | Activates the firewall. |
-| `sudo ufw status verbose` | N/A | Check the active firewall rules. |
-
-### 2. OpenSSH Server Configuration
-
-Restrict which users can connect and from which source IP.
-
-1. Edit the SSH daemon configuration file:
-
-    ```bash
-    sudo nano /etc/ssh/sshd_config
-    ```
-
-2. Add or modify the `AllowUsers` directive:
-
-    ```ini
-    # Allowed users
-    AllowUsers $username-current-machine@$midway-station-ip # Only this user can connect from the Midway Station IP
-    ```
-
-3. Restart the SSH service:
-
-    ```bash
-    sudo systemctl restart ssh
-    ```
-
-### 3. Fail2Ban Configuration
-
-Configure Fail2Ban to ignore connections coming from the trusted **Midway Station**.
-
-1. Edit the local jail configuration:
-
-    ```bash
-    sudo nano /etc/fail2ban/jail.local
-    ```
-
-2. Add the trusted host to the `ignoreip` list:
-
-    ```ini
-    [DEFAULT]
-    ignoreip = 127.0.0.1/8 $midway-station-ip # Does not jail local IP and Midway Station IP
-    ```
-
-3. Restart and check the service status:
-
-    ```bash
-    sudo systemctl restart fail2ban && sudo systemctl status fail2ban
-    ```
+*Part of the SGC Home Network infrastructure project*

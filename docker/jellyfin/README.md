@@ -1,178 +1,276 @@
-# 🎬 Jellyfin Media Server Deployment Guide
+# Jellyfin Media Server
 
-**VM Host:** VM 102 (Atlantis)
-**Purpose:** Self-hosted media server for streaming movies, TV shows, and anime.
-**Reference:** [Jellyfin Official Documentation](https://jellyfin.org/docs/general/installation/)
+A self-hosted media streaming server for movies, TV shows, and anime content, running on Docker.
 
----
+## Overview
 
-## 1. 🐳 Container Deployment
+Jellyfin is an open-source media server that provides streaming access to your personal media library. This deployment runs on VM 102 (Atlantis) and serves content from multiple network drives with optimized settings for anime and standard media.
 
-### A. Create Data Directories
+## Technology Stack
 
-Before running the container, create the necessary persistent storage folders on the host.
+- **Container Platform**: Docker
+- **Media Server**: Jellyfin (Official Docker Image)
+- **VM Host**: Atlantis (VM 102)
+- **Storage**: Network-mounted drives (Aincrad, Alfheim)
+
+## Architecture
+
+The server streams media from two primary storage locations:
+
+- **Aincrad Drive**: Dedicated anime content (shows and movies)
+- **Alfheim Drive**: Standard media (TV shows and movies)
+
+All media is mounted directly into the container with proper permissions and persistent configuration storage.
+
+## Features
+
+- 🎬 Stream movies and TV shows
+- 📺 Dedicated anime library support
+- 🌐 Web-based interface accessible on local network
+- 🔌 Plugin ecosystem for enhanced functionality
+- 📱 Multi-platform client support
+- 🎨 Custom metadata from multiple sources (AniDB, AniList, TheTVDB)
+
+## Installation
+
+### Prerequisites
+
+- Docker and Docker Compose installed on Atlantis VM
+- Drives mounted at `/drives/aincrad` and `/drives/alfheim`
+- Sufficient storage for configuration and cache
+
+### Directory Setup
+
+Create the required directories with proper permissions:
 
 ```bash
-# Create base jellyfin directory
-sudo mkdir /docker/jellyfin
+# Create base directory structure
+sudo mkdir -p /docker/jellyfin/{config,cache}
 
-# Create config and cache subdirectories
-sudo mkdir /docker/jellyfin/config
-sudo mkdir /docker/jellyfin/cache
-```
-
-### B. Set Folder Permissions
-
-Set the correct ownership (`1000:1000` is the default user ID/group ID for the Jellyfin container) to prevent permission errors.
-
-```bash
+# Set correct ownership (UID:GID 1000:1000)
 sudo chown -R 1000:1000 /docker/jellyfin
 ```
 
-### C. Create Compose File
+### Deployment
 
-Create the configuration file on the Atlantis VM.
+1. **Create the compose file:**
 
 ```bash
 nano /docker/composefiles/jellyfin-compose.yaml
 ```
 
-### D. Compose YAML Content
+2.**Add the configuration** (see docker-compose.yml in repository)
 
-This configuration maps your mounted data drives (`drives/aincrad` and `drives/alfheim`) directly into the container.
-
-**Note:** Replace `uid:gid` with your target user/group IDs (e.g., `1000:1000`) if you don't use the default container user.
-
-```yaml
-# see jellyfin-compose.yaml for latest running version
-services:
-  jellyfin:
-    image: jellyfin/jellyfin:latest
-    container_name: jellyfin
-    # Optional - specify the uid and gid you would like Jellyfin to use instead of root
-    user: 1000:1000 # if you use the default 
-    ports:
-      # Web UI (HTTP)
-      - 8096:8096/tcp
-      # Optional HTTPS/UDP: Add these if you configure SSL/UDP support later
-      # - 8920:8920/tcp # HTTPS
-      # - 7359:7359/udp # Autodiscovery
-      
-    volumes:
-      # PERSISTENCE: Stores Jellyfin databases and configuration
-      - /docker/jellyfin/config:/config
-      # CACHE: Stores transcoded media and temporary files
-      - /docker/jellyfin/cache:/cache
-      
-      # MEDIA MAPPING: Map Host Drives to Container Paths
-      # Aincrad (Anime)
-      - type: bind
-        source: /drives/aincrad/anime-shows
-        target: /anime-shows
-      - type: bind
-        source: /drives/aincrad/anime-movies
-        target: /anime-movies
-      
-      # Alfheim (Main Media)
-      - type: bind
-        source: /drives/alfheim/tv-shows
-        target: /tv-shows
-      - type: bind
-        source: /drives/alfheim/movies
-        target: /movies
-        read_only: false
-        
-      # Optional: Extra fonts for subtitle burn-in
-      # - type: bind
-      #   source: /path/to/fonts
-      #   target: /usr/local/share/fonts/custom
-      #   read_only: true
-        
-    restart: 'unless-stopped'
-    environment:
-      # Optional: Alternative address for autodiscovery/remote access if needed
-      # - JELLYFIN_PublishedServerUrl=http://example.com
-      TZ: 'Europe/Amsterdam' # Set your appropriate timezone
-    extra_hosts:
-      # Recommended for resolving Docker host networking issues
-      - 'host.docker.internal:host-gateway'
-```
-
-### E. Launch Container
-
-Start the Jellyfin container using the compose file.
+3.**Start the container:**
 
 ```bash
 sudo docker compose -f /docker/composefiles/jellyfin-compose.yaml up -d
 ```
 
+## Configuration
+
+### Docker Compose Configuration
+
+```yaml
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    user: 1000:1000
+    ports:
+      - 8096:8096/tcp    # Web UI (HTTP)
+      # - 8920:8920/tcp  # HTTPS (optional)
+      # - 7359:7359/udp  # Autodiscovery (optional)
+    volumes:
+      - /docker/jellyfin/config:/config
+      - /docker/jellyfin/cache:/cache
+      - /drives/aincrad/anime-shows:/anime-shows
+      - /drives/aincrad/anime-movies:/anime-movies
+      - /drives/alfheim/tv-shows:/tv-shows
+      - /drives/alfheim/movies:/movies
+    environment:
+      - TZ=Europe/Amsterdam
+    restart: unless-stopped
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+```
+
+### Media Library Structure
+
+| Container Path | Host Path | Content Type |
+|----------------|-----------|--------------|
+| `/anime-shows` | `/drives/aincrad/anime-shows` | Anime TV Series |
+| `/anime-movies` | `/drives/aincrad/anime-movies` | Anime Films |
+| `/tv-shows` | `/drives/alfheim/tv-shows` | Standard TV Shows |
+| `/movies` | `/drives/alfheim/movies` | Standard Movies |
+
+## Initial Setup
+
+Access the web UI at `http://atlantis-ip:8096` and complete the setup wizard:
+
+### 1. Basic Configuration
+
+- Select server language
+- Set server name
+- Create admin account
+
+### 2. Media Libraries
+
+Add libraries for each media type, mapping to container paths:
+
+- `/anime-shows`
+- `/anime-movies`
+- `/tv-shows`
+- `/movies`
+
+### 3. Metadata Settings
+
+- **Preferred Language**: English
+- **Country/Region**: United States
+- **Remote Access**: Enabled
+
+### 4. Home Screen Layout
+
+Configure the dashboard sections in order:
+
+| Section | Content |
+|---------|---------|
+| Section 1 | Continue Watching |
+| Section 2 | Next Up |
+| Section 3 | Recently Added Media |
+| Section 4 | My Media |
+| Sections 5-10 | None |
+
+**Library Display Order:**
+
+1. Anime
+2. Anime Movies
+3. TV-Shows
+4. Movies
+
+### 5. Playback & Subtitle Settings
+
+**Playback:**
+
+- Preferred audio language: **Japanese** (for anime content)
+
+**Subtitles:**
+
+- Preferred subtitle language: **English**
+
+## Plugins
+
+### Core Metadata Plugins
+
+Install these for enhanced metadata retrieval:
+
+- **AniDB** - Anime metadata
+- **AniList** - Anime tracking integration
+- **AniSearch** - Additional anime data
+- **Fanart** - High-quality artwork
+- **Kitsu** - Anime metadata alternative
+- **TheTVDB** - TV show metadata
+- **Playback Reporting** - Usage statistics
+
+### Custom Plugins
+
+Add custom plugin repositories via **Dashboard > Plugins > Manage Repositories**:
+
+- [Awesome Jellyfin](https://github.com/awesome-jellyfin/awesome-jellyfin)
+
+**Recommended Custom Plugins:**
+
+- **HoverTrailer** - Trailer previews on hover
+- **Intro Skipper** - Auto-skip episode intros
+
+## Access & Ports
+
+| Port | Protocol | Purpose |
+|------|----------|---------|
+| 8096 | TCP | Web UI (HTTP) |
+| 8920 | TCP | HTTPS (Optional) |
+| 7359 | UDP | Auto-discovery (Optional) |
+
+**Web Interface**: `http://atlantis-ip:8096`
+
+## Maintenance
+
+### View Container Logs
+
+```bash
+docker logs jellyfin
+docker logs -f jellyfin  # Follow mode
+```
+
+### Restart Container
+
+```bash
+docker restart jellyfin
+```
+
+### Update to Latest Version
+
+```bash
+cd /docker/composefiles
+docker compose -f jellyfin-compose.yaml pull
+docker compose -f jellyfin-compose.yaml up -d
+```
+
+### Backup Configuration
+
+```bash
+# Backup config directory
+sudo tar -czf jellyfin-config-backup-$(date +%Y%m%d).tar.gz /docker/jellyfin/config
+```
+
+## Storage Locations
+
+```txt
+/docker/jellyfin/
+  ├── config/          # Jellyfin configuration and database
+  └── cache/           # Transcoded media and temporary files
+
+/drives/
+  ├── aincrad/
+  │   ├── anime-shows/
+  │   └── anime-movies/
+  └── alfheim/
+      ├── tv-shows/
+      └── movies/
+```
+
+## Troubleshooting
+
+**Cannot access web UI?**
+
+- Verify container is running: `docker ps | grep jellyfin`
+- Check if port 8096 is accessible: `curl http://localhost:8096`
+- Review logs for errors: `docker logs jellyfin`
+
+**Media not showing up?**
+
+- Verify drive mounts are accessible
+- Check file permissions (should be readable by UID 1000)
+- Trigger library scan in Dashboard > Libraries
+
+**Transcoding issues?**
+
+- Check available disk space in `/docker/jellyfin/cache`
+- Review transcoding logs in Dashboard > Logs
+- Ensure proper hardware acceleration if configured
+
+## Security Notes
+
+- Container runs as non-root user (UID:GID 1000:1000)
+- Media volumes are mounted with read-write access
+- Remote access is enabled by default (configure reverse proxy for HTTPS in production)
+
+## References
+
+- [Jellyfin Official Documentation](https://jellyfin.org/docs/)
+- [Jellyfin Docker Hub](https://hub.docker.com/r/jellyfin/jellyfin)
+- [Awesome Jellyfin Plugins](https://github.com/awesome-jellyfin/awesome-jellyfin)
+
 ---
 
-## 2. ⚙️ Server Configuration (WebUI)
-
-Access the WebUI at **`http://$atlantis-ip:8096/`** to complete the setup.
-
-### A. Initial Setup Wizard
-
-1. **Language:** Choose the preferred server language.
-2. **Server Name:** Give the server a name.
-3. **Admin Account:** Create the **Admin Account** (create other user accounts later).
-4. **Add Media:** Follow the steps to add the library folders, mapping the container paths:
-    * `anime-shows`
-    * `anime-movies`
-    * `tv-shows`
-    * `movies`
-5. **Metadata:**
-    * Preferred Metadata Language: **English**
-    * Country/Region: **United States**
-6. **Remote Access:** Leave **"Allow remote connections to this server"** checked.
-7. **Finalize:** Complete the wizard.
-
-### B. Settings to Change (Dashboard)
-
-Navigate to **Dashboard** > **Settings** (or the respective sections):
-
-#### 1. Home Screen Settings
-
-| Section | Value | Notes |
-| :--- | :--- | :--- |
-| **Home screen section 1** | **Continue Watching** | |
-| **Home screen section 2** | **Next Up** | |
-| **Home screen section 3** | **Recently Added Media** | |
-| **Home screen section 4** | **My media** | |
-| **Sections 5-10** | **None** | |
-
-| Library Order | Position |
-| :--- | :--- |
-| **Anime** | 1 |
-| **Anime Movies** | 2 |
-| **TV-Shows** | 3 |
-| **Movies** | 4 |
-
-#### 2. Playback
-
-| Setting | Value |
-| :--- | :--- |
-| **Preferred audio language** | **Japanese** |
-
-#### 3. Subtitles
-
-| Setting | Value |
-| :--- | :--- |
-| **Preferred subtitle language** | **English** |
-
-### C. Add Plugins
-
-1. Go to **Dashboard** > **Plugins** > **Available**.
-2. Install the following plugins:
-    * AniDB
-    * AniList
-    * AniSearch
-    * Fanart
-    * Kitsu
-    * Playback Reporting
-    * TheTVDB
-3. Click on **Manage Repositories** and add custom repositories (e.g., [Awesome Jellyfin](https://github.com/awesome-jellyfin/awesome-jellyfin)).
-4. Install your preferred custom plugins:
-    * HoverTrailer
-    * Intro Skipper
+*Part of the SGC Home Network infrastructure project*

@@ -149,7 +149,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Amsterdam
-      - PORT=7879 ## Need to differentiatie all the ports and then name the instance in the settings under general > advanced > hostname
+      - PORT=7879 # Need to differentiatie all the ports and then name the instance in the settings under general > advanced > hostname
     volumes:
       - /docker/radarr-anime/config:/config # Separate config for separate instance
       - /drives/aincrad/anime-movies:/anime-movies

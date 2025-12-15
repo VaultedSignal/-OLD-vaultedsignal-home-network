@@ -1,21 +1,98 @@
-# 🤖 Portainer Agent Installation
+# Portainer Agent - Remote Management
 
-**Purpose:** Deploy the Portainer Agent on a remote Docker host for central management via the main Portainer server (Midway Station).
-**VMs:** Target is any remote host (e.g., Atlantis or Orion).
+Deploy Portainer Agent on remote Docker hosts for centralized management through your main Portainer server.
 
----
+## Overview
 
-## 1. On the Remote Docker Host (Target VM)
+The Portainer Agent is a lightweight container that runs on remote Docker hosts, enabling them to be managed from a central Portainer instance. This allows you to control multiple Docker environments from a single web interface without installing full Portainer on each host.
 
-### A. Run the Agent Container
+## Technology Stack
 
-On the **target machine's CLI** execute the following command as `sudo`.
+- **Agent Software**: Portainer Agent (Official Docker Image)
+- **Container Platform**: Docker
+- **Communication Port**: 9001
+- **Central Management**: Portainer CE (running on Midway Station)
 
-* **Port Mapping:** Exposes port **`9001`** for communication.
-* **Volumes:** Maps essential Docker directories and the root filesystem (`/:/host`) for full management capabilities.
+## Features
+
+- 🌐 Centralized multi-host Docker management
+- 🔒 Secure agent-to-server communication
+- 📊 Real-time monitoring of remote hosts
+- 🚀 Deploy containers across multiple hosts from one interface
+- 💾 Access to remote volumes and networks
+- 🔄 Automatic reconnection on network issues
+- ⚡ Lightweight resource footprint
+
+## Architecture
+
+```txt
+┌─────────────────────┐
+│  Midway Station     │
+│  (Portainer CE)     │
+│  Port: 9443         │
+└──────────┬──────────┘
+           │
+           │ Manages via Port 9001
+           │
+    ┌──────┴──────┬──────────────┐
+    │             │              │
+┌───▼────┐   ┌───▼────┐    ┌───▼────┐
+│Atlantis│   │ Orion  │    │ Other  │
+│ Agent  │   │ Agent  │    │ Hosts  │
+└────────┘   └────────┘    └────────┘
+```
+
+## Installation
+
+### Prerequisites
+
+- Docker installed on the target remote host
+- Port 9001 available on the target host
+- Network connectivity between Portainer server and agent host
+- Central Portainer instance already deployed (see Portainer README)
+
+### Deployment Methods
+
+#### Option 1: Docker Compose (Recommended)
+
+1. **Create directory structure:**
 
 ```bash
-#this a docker run command see .yaml file for current in use compose version.
+sudo mkdir -p /docker/portainer-agent
+cd /docker/portainer-agent
+```
+
+2.**Create compose file:**
+
+```bash
+sudo nano portainer-agent-compose.yaml
+```
+
+3.**Add the configuration:**
+
+```yaml
+services:
+  portainer_agent:
+    image: portainer/agent:2.33.5
+    container_name: portainer_agent
+    restart: always
+    ports:
+      - 9001:9001
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+      - /:/host
+```
+
+**Deploy the agent:**
+
+```bash
+sudo docker compose -f portainer-agent-compose.yaml up -d
+```
+
+#### Option 2: Docker Run Command
+
+```bash
 sudo docker run -d \
   -p 9001:9001 \
   --name portainer_agent \
@@ -26,35 +103,296 @@ sudo docker run -d \
   portainer/agent:2.33.5
 ```
 
-### B. Verification
+### Verification
 
-Check that the agent container is running:
+Confirm the agent is running:
 
 ```bash
 sudo docker ps -a | grep portainer_agent
 ```
 
+Expected output should show the container running on port 9001.
+
+## Configuration
+
+### Volume Mounts Explained
+
+| Host Path | Container Path | Purpose |
+|-----------|----------------|---------|
+| `/var/run/docker.sock` | `/var/run/docker.sock` | Docker API access (required) |
+| `/var/lib/docker/volumes` | `/var/lib/docker/volumes` | Access to Docker volumes |
+| `/` | `/host` | Host filesystem access for monitoring |
+
+### Port Configuration
+
+| Port | Protocol | Purpose |
+|------|----------|---------|
+| 9001 | TCP | Agent communication with Portainer server |
+
+**Important**: The root filesystem mount (`/:/host`) provides Portainer with visibility into the host system for comprehensive management capabilities.
+
+## Connecting to Portainer Server
+
+After deploying the agent on your remote host, add it to your central Portainer instance.
+
+### Step-by-Step Connection
+
+1. **Access Portainer WebUI:**
+   - Navigate to `https://midway-station-ip:9443`
+   - Log in with your admin credentials
+
+2. **Add New Environment:**
+   - Go to **Environments** (or **Administration** > **Environments**)
+   - Click **Add environment**
+   - Select **Docker Standalone**
+
+3. **Configure Environment:**
+
+   | Field | Value | Example |
+   |-------|-------|---------|
+   | **Name** | Descriptive hostname | `atlantis` or `orion` |
+   | **Environment URL** | `target-host-ip:9001` | `$serverip:9001` |
+
+4. **Connect:**
+   - Click **Connect** or **Add environment**
+   - Wait for connection verification
+   - Environment should appear in your environments list
+
+5. **Verify Connection:**
+   - The new environment should show as "Connected"
+   - Click on the environment name to manage it
+   - You should see containers, images, and other resources
+
+## Firewall Configuration
+
+Allow agent communication from your Portainer server:
+
+```bash
+# On the remote host (agent machine)
+# Allow Portainer server to connect to agent
+sudo ufw allow from midway-station-ip to any port 9001 proto tcp
+
+# Or allow from entire local network
+sudo ufw allow from $lanip/24 to any port 9001 proto tcp
+
+# Verify rules
+sudo ufw status verbose
+```
+
+**Note**: Replace IP addresses with your actual network configuration.
+
+## Multi-Host Deployment
+
+To manage multiple Docker hosts, repeat the agent installation on each host:
+
+### Example Setup
+
+1. **Midway Station** (Central Portainer Server)
+   - Portainer CE running on port 9443
+   - No agent needed (manages local Docker directly)
+
+2. **Atlantis** (Remote Host 1)
+   - Portainer Agent on port 9001
+   - Connected to Midway Station
+
+3. **Orion** (Remote Host 2)
+   - Portainer Agent on port 9001
+   - Connected to Midway Station
+
+4. **Additional Hosts**
+   - Deploy agent on each
+   - Add to Midway Station environments
+
+### Naming Convention
+
+Use consistent naming for easy identification:
+
+- **Host-based**: `atlantis`, `orion`, `prometheus`
+- **Purpose-based**: `media-server`, `download-manager`, `dns-server`
+- **Location-based**: `rack1-server1`, `office-docker`
+
+## Management
+
+### Switching Between Environments
+
+In Portainer WebUI:
+
+1. Click the environment dropdown (top-left)
+2. Select the host you want to manage
+3. All container operations now apply to that host
+
+### Viewing Agent Status
+
+Check agent health in Portainer:
+
+- Go to **Environments**
+- Look for green "Connected" status
+- Click environment name for details
+
+### Agent Logs
+
+View agent logs on the remote host:
+
+```bash
+# View recent logs
+sudo docker logs portainer_agent
+
+# Follow logs in real-time
+sudo docker logs -f portainer_agent
+
+# View last 100 lines
+sudo docker logs --tail 100 portainer_agent
+```
+
+## Maintenance
+
+### Update Agent
+
+```bash
+# Using Docker Compose
+cd /docker/portainer-agent
+sudo docker compose -f portainer-agent-compose.yaml pull
+sudo docker compose -f portainer-agent-compose.yaml up -d
+
+# Using Docker commands
+sudo docker stop portainer_agent
+sudo docker rm portainer_agent
+sudo docker pull portainer/agent:2.33.5
+# Then re-run the docker run command
+```
+
+### Restart Agent
+
+```bash
+sudo docker restart portainer_agent
+```
+
+### Remove Agent
+
+```bash
+# Using Docker Compose
+sudo docker compose -f portainer-agent-compose.yaml down
+
+# Using Docker commands
+sudo docker stop portainer_agent
+sudo docker rm portainer_agent
+```
+
+Then remove from Portainer WebUI:
+
+- Go to **Environments**
+- Select the environment
+- Click **Remove**
+
+## Troubleshooting
+
+**Agent not connecting to Portainer?**
+
+- Verify agent is running: `sudo docker ps | grep portainer_agent`
+- Check network connectivity: `ping target-host-ip`
+- Verify port 9001 is open: `telnet target-host-ip 9001`
+- Check firewall rules on both hosts
+- Review agent logs for errors
+
+**"Unable to connect to environment" error?**
+
+- Verify correct IP address and port in Portainer
+- Ensure agent container is running
+- Check if port 9001 is accessible from Portainer server
+- Verify no firewall blocking between hosts
+
+**Agent container won't start?**
+
+- Check if port 9001 is already in use: `sudo netstat -tulpn | grep :9001`
+- Verify Docker socket is accessible
+- Review container logs: `sudo docker logs portainer_agent`
+- Ensure sufficient system resources
+
+**Can see agent but can't manage containers?**
+
+- Verify Docker socket is mounted correctly
+- Check volume mounts in container configuration
+- Ensure agent has proper permissions
+- Review agent version compatibility with Portainer server
+
+**Connection keeps dropping?**
+
+- Check network stability between hosts
+- Verify restart policy is set to `always`
+- Review firewall rules for intermittent blocking
+- Check system resources on agent host
+
+## Security Considerations
+
+- **Full Docker Access**: Agent has complete control over host Docker
+- **Root Filesystem Access**: Agent can access entire host filesystem
+- **Network Security**: Limit agent port access to trusted networks only
+- **Version Pinning**: Using specific version (2.33.5) for stability
+- **Communication**: Consider using VPN or private network for production
+- **Firewall Rules**: Restrict port 9001 to Portainer server IP only
+
+## Performance
+
+- **Memory Usage**: ~30-50 MB per agent
+- **CPU Usage**: Minimal (< 2%)
+- **Network**: Low bandwidth, primarily API calls
+- **Startup Time**: < 3 seconds
+- **Overhead**: Negligible impact on Docker performance
+
+## Advanced Configuration
+
+### Edge Agent Mode
+
+For hosts behind NAT or firewalls:
+
+1. In Portainer, select **Edge Agent** instead of standard agent
+2. Follow deployment instructions for reverse tunnel
+3. Agent connects outbound to Portainer (no inbound ports needed)
+
+### TLS Encryption
+
+For encrypted agent communication:
+
+1. Generate TLS certificates
+2. Mount certificates in agent container
+3. Configure Portainer to use TLS for agent connections
+
+### Custom Agent Configuration
+
+Set environment variables in compose file:
+
+```yaml
+environment:
+  - AGENT_SECRET=your_secret_key
+  - LOG_LEVEL=INFO
+  - AGENT_CLUSTER_ADDR=agent-cluster-address
+```
+
+## Use Cases
+
+- **Multi-Server Media Stack**: Manage Jellyfin, Plex across multiple hosts
+- **Distributed Downloads**: Control download containers on different VMs
+- **Service Segregation**: Separate production and testing environments
+- **Resource Distribution**: Balance containers across multiple hosts
+- **Backup Hosts**: Manage backup containers remotely
+
+## Storage Location
+
+```txt
+/docker/portainer-agent/
+  └── portainer-agent-compose.yaml    # Agent configuration (if using compose)
+
+# No persistent data storage needed
+# Agent is stateless and rebuilds from Portainer server
+```
+
+## References
+
+- [Portainer Agent Documentation](https://docs.portainer.io/admin/environments/add/docker/agent)
+- [Portainer Agent Docker Hub](https://hub.docker.com/r/portainer/agent)
+- [Portainer Multi-Environment Guide](https://docs.portainer.io/admin/environments)
+- [Docker Socket Security](https://docs.docker.com/engine/security/protect-access/)
+
 ---
 
-## 2. On the Central Portainer WebUI (Midway Station)
-
-Once the agent is running on the remote host, connect it to your central Portainer instance (Midway Station) using your browser at **`https://[Midway Station IP]:9443/`**.
-
-### A. Add Environment
-
-1.  Navigate to **Administration** > **Environment-related** > **Enviorments**.
-2.  Click **Add Environment**.
-3.  Choose **Docker Standalone**
-
-### B. Configuration
-
-Fill in the details for the remote environment:
-
-| Field | Value | Notes |
-| :--- | :--- | :--- |
-| **Name** | `$hostname-target-machine` | |
-| **Environment address** | `$target-machine-ip:9001` | Use the **IP address** of the target machine, followed by port `9001`. |
-
-Click **Connect**.
-
-The target VM should now appear as a new environment on your Portainer home screen, ready for centralized management.
+*Part of the SGC Home Network infrastructure project*
