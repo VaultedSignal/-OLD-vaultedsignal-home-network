@@ -88,4 +88,5 @@ sudo docker run hello-world
 If successful, you will see a message confirming the installation works.
 
 ### Handy list of Docker container images
+
 [LinuxServer.io](https://docs.linuxserver.io/images-by-category/) has a lot of docker container images

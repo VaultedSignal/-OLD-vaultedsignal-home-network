@@ -17,11 +17,11 @@ services:
       # Sonarr Web UI (default 8989)
       - "8989:8989"
       # Sonarr-Anime Web UI (using host port 8990 to avoid conflict)
-      - "8990:8989"
+      - "8990:8990"
       # Radarr Web UI (default 7878)
       - "7878:7878"
       # Radarr-Anime Web UI (using host port 7879 to avoid conflict)
-      - "7879:7878"
+      - "7879:7879"
       # Huntarr Web UI (default 8686 - note: Huntarr is not official, confirm port if different)
       - "8686:8686"
       # Cleanuparr Web UI (default 5050 - if it has one, adjust port if different)
@@ -95,6 +95,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Amsterdam
+      - PORT=8989 # need to specify the port cauze there is more then 1 instance in the compose
     volumes:
       - /docker/sonarr/config:/config
       - /drives/alfheim/tv-shows:/tv-shows
@@ -112,7 +113,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Amsterdam
-      - PORT=8989 # The internal port is the same, but the host port is different (8990)
+      - PORT=8990 # Need to differentiatie all the ports and then name the instance in the settings under general > advanced > hostname
     volumes:
       - /docker/sonarr-anime/config:/config # Separate config for separate instance
       - /drives/aincrad/anime-shows:/anime-shows
@@ -130,6 +131,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Amsterdam
+      - PORT=7878 # need to specify the port cauze there is more then 1 instance in the compose
     volumes:
       - /docker/radarr/config:/config
       - /drives/alfheim/movies:/movies
@@ -147,7 +149,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Amsterdam
-      - PORT=7878 # The internal port is the same, but the host port is different (7879)
+      - PORT=7879 ## Need to differentiatie all the ports and then name the instance in the settings under general > advanced > hostname
     volumes:
       - /docker/radarr-anime/config:/config # Separate config for separate instance
       - /drives/aincrad/anime-movies:/anime-movies
