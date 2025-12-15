@@ -119,6 +119,14 @@ The setup runs two instances each of Sonarr and Radarr to separate standard and 
 - **Server Location**: Poland (configurable via `SERVER_COUNTRIES`)
 - **Local Network Access**: Configured via `FIREWALL_OUTBOUND_SUBNETS` to allow communication with local services
 
+### qBittorrent Configuration
+
+A temperary password will be generated when the container first starts you can see this temp password by using the following command:
+
+```bash
+sudo docker logs qbittorrent
+```
+
 ### Network Mode
 
 All services use `network_mode: "service:gluetun"`, which means:
@@ -180,3 +188,75 @@ This project is for personal use and educational purposes.
 ---
 
 *Part of the SGC Home Network infrastructure project*
+
+
+
+
+
+# qBit settings that need to be added to this doc
+
+In the behavior tab:
+
+```txt
+- Show external IP in status bar
+```
+
+in the downloads tab:
+
+```txt
+- Merge trackers to existing torrent
+- Delete .torrent files afterwards
+- Default torrent managment mode: Automatic
+- Keep incomplete torrents in: /Downloads/incomplete
+- [Exclude file names](https://qwertyarticles.com/2024/11/14/protect-qbittorrent-from-malicious-content/)
+```
+
+in the Connection tab:
+
+```txt
+-
+```
+
+in the speed tab:
+
+```txt
+-
+```
+
+in the BitTorrent tab:
+
+```txt
+- Anonymouse mode
+- Max downloads 10
+- Max uploads 1
+- Max active 20
+- Seeding limit when total seeding time reaches 0 min then stop torrent
+```
+
+in the RSS tab:
+
+```txt
+-
+```
+
+in the WebUI tab:
+
+```txt
+- set user and password
+```
+
+in the Advanced tab:
+
+```txt
+- Physical memory (RAM) usage limit: 16384
+```
+
+
+# adding apps to prowlarr
+
+app server: http://localhost:PORT
+
+
+# adding qBittorrent to apps
+Host: 127.0.0.1
+Port: 8080

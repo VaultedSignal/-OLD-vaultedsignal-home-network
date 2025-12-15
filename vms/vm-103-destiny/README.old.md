@@ -24,7 +24,7 @@ This VM uses a **Shutdown Timeout** to ensure download processes are terminated 
 | | Discard | **Checked** | |
 | **CPU** | Sockets/Cores | 1 Socket / 2 Cores | |
 | | Type | `host` | |
-| **Memory** | RAM | `4096 MB` | |
+| **Memory** | RAM | `16384 MB` | |
 
 ### Options (Boot/Shutdown)
 
