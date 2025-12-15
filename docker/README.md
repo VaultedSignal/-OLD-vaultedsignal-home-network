@@ -13,7 +13,7 @@ This guide covers the installation of Docker Engine from the official Docker rep
 - **Container Runtime**: Containerd
 - **Build Tools**: Docker Buildx Plugin
 - **Orchestration**: Docker Compose Plugin
-- **Supported OS**: Debian-based distributions (Ubuntu, Debian, Linux Mint)
+- **Supported OS**: Linux distributions
 
 ## Features
 
@@ -27,7 +27,7 @@ This guide covers the installation of Docker Engine from the official Docker rep
 
 ## Prerequisites
 
-- Debian-based Linux distribution (Ubuntu 20.04+, Debian 11+)
+- Linux distribution (Ubuntu 20.04+, Debian 11+)
 - Root or sudo access
 - Active internet connection
 - x86_64/amd64 architecture (or arm64 for ARM-based systems)
@@ -477,4 +477,4 @@ After installing Docker, you can:
 
 ---
 
-*Part of the SGC Home Network infrastructure project*
+*Part of the SGC Home Network infrastructure project**

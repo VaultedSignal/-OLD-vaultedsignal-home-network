@@ -478,7 +478,7 @@ Add to `[DEFAULT]` section:
 ```ini
 [DEFAULT]
 # Whitelist your trusted IPs (space-separated)
-ignoreip = 127.0.0.1/8 ::1 192.168.1.0/24 10.0.0.0/8
+ignoreip = 127.0.0.1/8 ::1 192.168.2.0/24 10.0.0.0/8
 ```
 
 Restart Fail2Ban:
@@ -648,4 +648,4 @@ ssh -D 1080 username@server
 
 ---
 
-*Part of the SGC Home Network infrastructure project*
+*Part of the SGC Home Network infrastructure project**

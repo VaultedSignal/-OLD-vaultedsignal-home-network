@@ -44,7 +44,7 @@ This guide covers the essential steps after installing Proxmox VE, including rep
 
 After installation, access the web interface:
 
-**URL**: `https://proxmox-ip:8006`
+**URL**: `https://192.168.2.200:8006`
 
 **Default Credentials**:
 
@@ -147,7 +147,7 @@ Update the line with your hostname:
 
 ```text
 127.0.0.1       localhost
-192.168.1.10    stargatecommand.local stargatecommand
+192.168.2.10    stargatecommand.local stargatecommand
 
 # IPv6 entries
 ::1             localhost ip6-localhost ip6-loopback
@@ -184,8 +184,8 @@ iface eno1 inet manual
 # Bridge for VMs (vmbr0)
 auto vmbr0
 iface vmbr0 inet static
-    address 192.168.1.10/24      # Static IP and subnet mask
-    gateway 192.168.1.1           # Router/gateway IP
+    address 192.168.2.200/24      # Static IP and subnet mask
+    gateway 192.168.2.254           # Router/gateway IP
     bridge-ports eno1             # Physical interface
     bridge-stp off                # Disable spanning tree
     bridge-fd 0                   # Forward delay
@@ -228,10 +228,10 @@ nameserver 1.0.0.1
 # nameserver 8.8.4.4
 
 # Or your router
-# nameserver 192.168.1.1
+# nameserver 192.168.2.1
 
 # Or Pi-hole (if installed)
-# nameserver 192.168.1.999
+# nameserver 192.168.2.999
 ```
 
 ### Apply Network Changes
@@ -268,10 +268,9 @@ Create a non-root user for daily administration:
 1. Navigate to **Datacenter** > **Permissions** > **Users**
 2. Click **Add**
 3. Fill in details:
-   - **User name**: `admin` (or your preferred username)
+   - **User name**: `oneill`
    - **Realm**: `Proxmox VE authentication server`
    - **Password**: Set strong password
-   - **Email**: Your email address
 4. Click **Add**
 
 **Grant Administrator Role**:
@@ -290,21 +289,21 @@ Allow the new user to use SSH and sudo:
 
 ```bash
 # Create home directory
-mkdir -p /home/admin
-chown admin:admin /home/admin
-chmod 700 /home/admin
+mkdir -p /home/oneill
+chown oneill:oneill /home/oneill
+chmod 700 /home/oneill
 
 # Set shell to bash
-usermod -s /bin/bash admin
+usermod -s /bin/bash oneill
 
 # Install sudo if not present
 apt update && apt install sudo -y
 
 # Add user to sudo group
-usermod -aG sudo admin
+usermod -aG sudo adoneillmin
 
 # Test sudo access
-su - admin
+su - oneill
 sudo whoami
 # Should output: root
 ```
@@ -410,10 +409,10 @@ ufw default deny incoming
 ufw default allow outgoing
 
 # Allow SSH from local network only
-ufw allow from 192.168.1.0/24 to any port 22 proto tcp
+ufw allow from 192.168.2.0/24 to any port 22 proto tcp
 
 # Allow Proxmox web interface from local network only
-ufw allow from 192.168.1.0/24 to any port 8006 proto tcp
+ufw allow from 192.168.2.0/24 to any port 8006 proto tcp
 
 # Explicitly deny SSH from everywhere else (optional, already covered by default deny)
 ufw deny 22/tcp
@@ -435,8 +434,8 @@ New profiles: skip
 
 To                         Action      From
 --                         ------      ----
-22/tcp                     ALLOW IN    192.168.1.0/24
-8006/tcp                   ALLOW IN    192.168.1.0/24
+22/tcp                     ALLOW IN    192.168.2.0/24
+8006/tcp                   ALLOW IN    192.168.2.0/24
 22/tcp                     DENY IN     Anywhere
 ```
 
@@ -446,17 +445,17 @@ Additional rules for specific services:
 
 ```bash
 # Allow VNC console access from local network (ports 5900-5999)
-ufw allow from 192.168.1.0/24 to any port 5900:5999 proto tcp
+ufw allow from 192.168.2.0/24 to any port 5900:5999 proto tcp
 
 # Allow SPICE console access from local network (port 3128)
-ufw allow from 192.168.1.0/24 to any port 3128 proto tcp
+ufw allow from 192.168.2.0/24 to any port 3128 proto tcp
 
 # Allow migration traffic between Proxmox nodes (if clustered)
-# ufw allow from 192.168.1.11 to any port 60000:60050 proto tcp
+# ufw allow from 192.168.2.11 to any port 60000:60050 proto tcp
 
 # Allow Ceph traffic (if using Ceph storage)
-# ufw allow from 192.168.1.0/24 to any port 6789 proto tcp
-# ufw allow from 192.168.1.0/24 to any port 6800:7300 proto tcp
+# ufw allow from 192.168.2.0/24 to any port 6789 proto tcp
+# ufw allow from 192.168.2.0/24 to any port 6800:7300 proto tcp
 ```
 
 ### Proxmox Built-in Firewall (Alternative/Additional)
@@ -486,10 +485,10 @@ enable: 1
 
 [RULES]
 # Allow SSH from local network
-IN ACCEPT -source 192.168.1.0/24 -dport 22 -proto tcp
+IN ACCEPT -source 192.168.2.0/24 -dport 22 -proto tcp
 
 # Allow Proxmox web interface from local network
-IN ACCEPT -source 192.168.1.0/24 -dport 8006 -proto tcp
+IN ACCEPT -source 192.168.2.0/24 -dport 8006 -proto tcp
 
 # Drop all other incoming
 IN DROP
@@ -522,7 +521,7 @@ nano /etc/fail2ban/jail.local
 ```ini
 [DEFAULT]
 # Whitelist your local network
-ignoreip = 127.0.0.1/8 ::1 192.168.1.0/24
+ignoreip = 127.0.0.1/8 ::1 192.168.2.0/24
 
 # Ban duration
 bantime = 1h
@@ -583,14 +582,14 @@ fail2ban-client status proxmox
 
 ```bash
 # SSH as new user
-ssh admin@proxmox-ip
+ssh oneill@192.168.2.200
 
 # Test sudo access
 sudo pvesh get /version
 
 # Access web interface
-# Navigate to https://proxmox-ip:8006
-# Log in as admin@pve
+# Navigate to https://192.168.2.200:8006
+# Log in as oneill@pve
 ```
 
 ### Test Security Measures
@@ -670,7 +669,7 @@ ufw status verbose > /root/ufw-rules-$(date +%Y%m%d).txt
 
 **Cannot access web interface after firewall setup?**
 
-- Ensure you're connecting from allowed network (192.168.1.0/24)
+- Ensure you're connecting from allowed network (192.168.2.0/24)
 - Check UFW rules: `sudo ufw status`
 - Temporarily disable UFW to test: `sudo ufw disable`
 

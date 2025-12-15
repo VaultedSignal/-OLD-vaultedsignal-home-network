@@ -106,7 +106,7 @@ services:
 
 ## Initial Setup
 
-Access the web UI at `http://atlantis-ip:8096` and complete the setup wizard:
+Access the web UI at `http://192.168.2.202:8096` and complete the setup wizard:
 
 ### 1. Basic Configuration
 
@@ -244,7 +244,7 @@ sudo tar -czf jellyfin-config-backup-$(date +%Y%m%d).tar.gz /docker/jellyfin/con
 **Cannot access web UI?**
 
 - Verify container is running: `docker ps | grep jellyfin`
-- Check if port 8096 is accessible: `curl http://localhost:8096`
+- Check if port 8096 is accessible: `curl http://192.168.2.202:8096`
 - Review logs for errors: `docker logs jellyfin`
 
 **Media not showing up?**

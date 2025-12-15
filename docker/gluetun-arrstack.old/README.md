@@ -87,7 +87,7 @@ Create a `.env` file in the same directory as `docker-compose.yml`:
 ```env
 nordvpnuser=your_nordvpn_username
 nordvpnpasswd=your_nordvpn_password
-lanip=192.168.1.0  # Replace with your local network subnet
+lanip=192.168.2.0  # Replace with local network subnet if changed
 ```
 
 ### Installation
@@ -101,7 +101,7 @@ lanip=192.168.1.0  # Replace with your local network subnet
 docker-compose up -d
 ```
 
-5. Access the services via `http://your-server-ip:PORT`
+5. Access the services via `http://192.168.2.203:PORT`
 
 ## Configuration Notes
 
@@ -111,7 +111,7 @@ The setup runs two instances each of Sonarr and Radarr to separate standard and 
 
 - Each instance uses a **different port** (configured via `PORT` environment variable)
 - Each instance has **separate config directories**
-- Configure the hostname in each instance: `Settings > General > Advanced > Hostname`
+- Configure the hostname and port in each instance: `Settings > General > Advanced > Hostname/Port`
 
 ### VPN Configuration
 

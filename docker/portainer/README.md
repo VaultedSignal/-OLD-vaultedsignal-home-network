@@ -113,19 +113,19 @@ Apply these UFW rules to allow HTTPS access from your local network:
 
 ```bash
 # Allow Portainer web interface from local network
-sudo ufw allow from 192.168.1.0/24 to any port 9443 proto tcp
+sudo ufw allow from 192.168.2.0/24 to any port 9443 proto tcp
 
 # Verify configuration
 sudo ufw status verbose
 ```
 
-**Note:** Replace `192.168.1.0/24` with your actual local network subnet.
+**Note:** Replace `192.168.2.0/24` with actual local network subnet if changed.
 
 ## Initial Setup
 
 ### First-Time Access
 
-1. Navigate to `https://vm-ip:9443` in your web browser
+1. Navigate to `https://192.168.2.253:9443` in your web browser
 2. Accept the self-signed certificate warning (first time only)
 3. Create your admin account:
    - **Username**: admin (default)

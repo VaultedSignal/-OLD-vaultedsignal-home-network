@@ -1,3 +1,5 @@
+# *Subject to change PiHole is going to move to a RasberryPi 4b*
+
 # Pi-hole Network Ad Blocker
 
 A network-wide DNS-based ad blocking and filtering solution running on Docker.
@@ -128,8 +130,8 @@ Apply these UFW rules on the Prometheus VM to allow Pi-hole traffic from your lo
 sudo apt install ufw -y
 
 # Allow Web Interface from local network
-sudo ufw allow from $lanip/24 to any port 80 proto tcp
-sudo ufw allow from $lanip/24 to any port 443 proto tcp
+sudo ufw allow from 192.168.2.0/24 to any port 80 proto tcp
+sudo ufw allow from 192.168.2.0/24 to any port 443 proto tcp
 
 # Allow DNS Queries
 sudo ufw allow 53/tcp
@@ -149,7 +151,7 @@ sudo ufw enable
 sudo ufw status verbose
 ```
 
-**Note:** Replace `$lanip/24` with your actual local network subnet.
+**Note:** Replace `192.168.2.0/24` with your actual local network subnet.
 
 ## Network Setup
 
@@ -355,4 +357,4 @@ Monitor Pi-hole performance:
 
 ---
 
-*Part of the SGC Home Network infrastructure project*
+*Part of the SGC Home Network infrastructure project**

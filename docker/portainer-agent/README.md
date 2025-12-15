@@ -138,7 +138,7 @@ After deploying the agent on your remote host, add it to your central Portainer 
 ### Step-by-Step Connection
 
 1. **Access Portainer WebUI:**
-   - Navigate to `https://midway-station-ip:9443`
+   - Navigate to `https://192.168.201:9443`
    - Log in with your admin credentials
 
 2. **Add New Environment:**
@@ -150,8 +150,8 @@ After deploying the agent on your remote host, add it to your central Portainer 
 
    | Field | Value | Example |
    |-------|-------|---------|
-   | **Name** | Descriptive hostname | `atlantis` or `orion` |
-   | **Environment URL** | `target-host-ip:9001` | `$serverip:9001` |
+   | **Name** | Descriptive hostname | `Target hostname` |
+   | **Environment URL** | `Target host IP:9001` | `Server IP:9001` |
 
 4. **Connect:**
    - Click **Connect** or **Add environment**
@@ -170,10 +170,10 @@ Allow agent communication from your Portainer server:
 ```bash
 # On the remote host (agent machine)
 # Allow Portainer server to connect to agent
-sudo ufw allow from midway-station-ip to any port 9001 proto tcp
+sudo ufw allow from 192.168.2.201 to any port 9001 proto tcp
 
 # Or allow from entire local network
-sudo ufw allow from $lanip/24 to any port 9001 proto tcp
+sudo ufw allow from 192.168.2.0/24 to any port 9001 proto tcp
 
 # Verify rules
 sudo ufw status verbose
