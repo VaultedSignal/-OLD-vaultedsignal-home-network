@@ -36,4 +36,5 @@ services:
       - SYS_TIME
       # SYS_NICE is optional for priority setting
       - SYS_NICE
-    restart: unless-stopped
+    restart: always
+    

@@ -57,15 +57,15 @@ sudo mkdir -p /docker/pihole/etc-pihole
 
 ```bash
 cd /docker/composefiles
-sudo nano pi-hole-compose.yaml
+sudo nano pihole-compose.yaml
 ```
 
-2.**Add the configuration** (see pi-hole-compose.yaml in repository)
+2.**Add the configuration** (see pihole-compose.yaml in repository)
 
 3.**Start the container:**
 
 ```bash
-sudo docker compose -f pi-hole-compose.yaml up -d
+sudo docker compose -f pihole-compose.yaml up -d
 ```
 
 4.**Verify deployment:**
@@ -221,8 +221,8 @@ After adding blocklists:
 
 ```bash
 cd /docker/composefiles
-sudo docker compose -f pi-hole-compose.yaml pull
-sudo docker compose -f pi-hole-compose.yaml up -d
+sudo docker compose -f pihole-compose.yaml pull
+sudo docker compose -f pihole-compose.yaml up -d
 ```
 
 ### Update Blocklists
