@@ -64,10 +64,10 @@ Add the following content:
 ```text
 ****************************************************************
 *                                                              *
-*  WARNING: Authorized users only. All activity is logged.    *
+*  WARNING: Authorized users only. All activity is logged.     *
 *                                                              *
-*  Unauthorized access is strictly prohibited and will be     *
-*  prosecuted to the fullest extent of the law.               *
+*  Unauthorized access is strictly prohibited and will be      *
+*  prosecuted to the fullest extent of the law.                *
 *                                                              *
 ****************************************************************
 ```
