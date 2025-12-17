@@ -1,0 +1,33 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN #Gives gluetun the necessary permissions to manage VPN connections
+    devices:
+      - /dev/net/tun:/dev/net/tun
+
+    # IMPORTANT: These are the ports to access the web UIs from your laptop.
+    # The format is HOST_PORT:CONTAINER_PORT
+    ports:
+      # qBittorrent Web UI (default 8080)
+      - "8080:8080/"
+
+    environment:
+      # --- VPN CONFIGURATION (NordVPN) ---
+      - VPN_SERVICE_PROVIDER=nordvpn
+      - VPN_TYPE=openvpn # VPN provider
+      - OPENVPN_USER=Lpc8FjMND5HTmEg5pJ7HKa3x
+      - OPENVPN_PASSWORD=mmssMbjFzWdJFdxeisWzHTqD
+      - SERVER_COUNTRIES=Poland # Optional: Restrict to a specific country
+      - TZ=Europe/Amsterdam
+
+      # Recommended for NordVPN and P2P traffic
+      - NORDVPN_PROTOCOL=tcp
+
+      # Optional: Add local network so the *arr apps can talk to other non-VPN services (e.g., NAS, reverse proxy)
+      # - FIREWALL_OUTBOUND_SUBNETS=192.168.2.0/24 # REPLACE with local subnet
+
+    volumes:
+      - /docker/gluetun:/gluetun
+    restart: unless-stopped

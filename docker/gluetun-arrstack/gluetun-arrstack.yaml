@@ -62,8 +62,7 @@ services:
       - WEBUI_PORT=8080
     volumes:
       - /docker/qbittorrent/config:/config
-      - /drives/theseed/downloads/incomplete:/incomplete # incomplete downloads are here
-      - /drives/theseed/downloads/complete:/complete # complete downloads are here for the arr stack
+      - /drives/theseed/downloads:/downloads #folder for all downloads
       - /drives/theseed/torrents:/torrents # auto add torrents from this folder
     depends_on:
       gluetun:
@@ -99,7 +98,7 @@ services:
     volumes:
       - /docker/sonarr/config:/config
       - /drives/alfheim//tv-shows:/tv-shows
-      - /drives/theseed/downloads/complete:/downloads/complete
+      - /drives/theseed/downloads:/downloads
     depends_on:
       gluetun:
         condition: service_healthy
@@ -117,7 +116,7 @@ services:
     volumes:
       - /docker/sonarr-anime/config:/config # Separate config for separate instance
       - /drives/aincrad/anime-shows:/anime-shows
-      - /drives/theseed/downloads/complete:/downloads/complete
+      - /drives/theseed/downloads:/downloads
     depends_on:
       gluetun:
         condition: service_healthy
@@ -135,7 +134,7 @@ services:
     volumes:
       - /docker/radarr/config:/config
       - /drives/alfheim/movies:/movies
-      - /drives/theseed/downloads/complete:/downloads/complete
+      - /drives/theseed/downloads:/downloads
     depends_on:
       gluetun:
         condition: service_healthy
@@ -153,7 +152,7 @@ services:
     volumes:
       - /docker/radarr-anime/config:/config # Separate config for separate instance
       - /drives/aincrad/anime-movies:/anime-movies
-      - /drives/theseed/downloads/complete:/downloads/complete
+      - /drives/theseed/downloads:/downloads
     depends_on:
       gluetun:
         condition: service_healthy

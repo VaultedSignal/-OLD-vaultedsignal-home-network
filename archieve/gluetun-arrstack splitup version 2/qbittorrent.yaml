@@ -1,0 +1,16 @@
+services:
+  qbittorrent:
+    image: linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+      - WEBUI_PORT=8888
+    volumes:
+      - /docker/qbittorrent/config:/config
+      - /drives/theseed/downloads/incomplete:/incomplete # incomplete downloads are here
+      - /drives/theseed/downloads/complete:/complete # complete downloads are here for the arr stack
+      - /drives/theseed/torrents:/torrents # auto add torrents from this folder
+    network_mode: container:gluetun  # run it through the VPN
+    restart: unless-stopped

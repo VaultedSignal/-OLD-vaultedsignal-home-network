@@ -1,0 +1,15 @@
+services:
+  sonarr-anime:
+    image: linuxserver/sonarr:latest
+    container_name: sonarr-anime
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+    volumes:
+      - /docker/sonarr-anime/config:/config # Separate config for separate instance
+      - /drives/aincrad/anime-shows:/anime-shows
+      - /drives/theseed/downloads/complete:/downloads/complete
+    ports:
+      - 8990:8989
+    restart: unless-stopped

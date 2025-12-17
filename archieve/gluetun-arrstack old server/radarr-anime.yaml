@@ -1,0 +1,15 @@
+services:
+  radarr-anime:
+    image: linuxserver/radarr:latest
+    container_name: radarr-anime
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+    volumes:
+      - /docker/radarr-anime/config:/config
+      - /drives/anime:/anime-movies
+      - /drives/downloaddrive/complete:/downloads/complete
+    ports:
+      - 7879:7878
+    restart: unless-stopped
