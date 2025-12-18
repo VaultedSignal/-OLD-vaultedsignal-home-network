@@ -1,0 +1,60 @@
+# 📤 Setting up NFS Client Shares
+
+**Purpose:** Configure a client VM (e.g., Orion or Destiny) to permanently mount storage volumes exported via NFS from the central NAS/File Server (e.g., Atlantis).
+**NFS Server IP (Example):** `192.168.2.202` (Assuming this is the IP of your NFS Server)
+
+---
+
+## 1. 🛠️ Install NFS Client and Create Mount Points
+
+On the **client VM** (the machine that needs to access the shares), install the necessary client utilities and create the local directories where the remote shares will appear.
+
+\`\`\`bash
+# Install the NFS client utilities
+sudo apt update
+sudo apt install nfs-common -y
+
+# Create local mount points for the remote shares
+sudo mkdir -p /mnt/aincrad
+sudo mkdir -p /mnt/alfheim
+\`\`\`
+
+---
+
+## 2. 🧪 Test Mount the NFS Shares
+
+Temporarily mount the remote shares to verify that the connection works and permissions are correct before making the entries permanent.
+
+\`\`\`bash
+# Test mount the 'aincrad' share (Replace IP with your NFS Server's IP)
+sudo mount 192.168.2.202:/drives/aincrad /mnt/aincrad
+
+# Test mount the 'alfheim' share (Replace IP with your NFS Server's IP)
+sudo mount 192.168.2.202:/drives/alfheim /mnt/alfheim
+\`\`\`
+
+## 3. 💾 Make Mounts Persistent (`/etc/fstab`)
+
+To ensure the shares are mounted automatically after every reboot, add the entries to the File System Table (`/etc/fstab`).
+
+1.  Edit the `fstab` file:
+    \`\`\`bash
+    sudo nano /etc/fstab
+    \`\`\`
+2.  Add the following lines:
+    ```fstab
+    # NFS Mounts from 192.168.2.202 (NFS Server)
+    192.168.2.202:/drives/aincrad /mnt/aincrad nfs defaults 0 0
+    192.168.2.202:/drives/alfheim /mnt/alfheim nfs defaults 0 0
+    ```
+3.  Reload the daemon and verify the mounts:
+    \`\`\`bash
+    # Reload systemd daemon
+    sudo systemctl daemon-reload
+
+    # Mount all entries specified in fstab (this will remount the test mounts)
+    sudo mount -a
+
+    # Check the mounts
+    df -h | grep nfs
+    \`\`\`

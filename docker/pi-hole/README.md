@@ -354,6 +354,7 @@ Monitor Pi-hole performance:
 - [Pi-hole Docker Hub](https://hub.docker.com/r/pihole/pihole)
 - [Pi-hole GitHub Repository](https://github.com/pi-hole/docker-pi-hole/)
 - [Hagezi DNS Blocklists](https://github.com/hagezi/dns-blocklists)
+- [More hagezi lists](https://github.com/hagezi/dns-blocklists?tab=readme-ov-file#pro)
 
 ---
 
