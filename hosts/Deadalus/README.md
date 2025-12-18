@@ -1,4 +1,0 @@
-# Deadalus
-
-## installing Archlinux
-
