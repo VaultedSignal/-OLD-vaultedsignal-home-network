@@ -20,7 +20,7 @@ services:
       # Timezone: Europe/Amsterdam
       TZ: 'Europe/Amsterdam'
       # Web Interface Password
-      FTLCONF_webserver_api_password: '$password'
+      FTLCONF_webserver_api_password=${passwd} # see .env
       # DNS Listening Mode: 'ALL' required when using Docker's bridge network
       FTLCONF_dns_listeningMode: 'ALL'
       # Upstream DNS server(s)

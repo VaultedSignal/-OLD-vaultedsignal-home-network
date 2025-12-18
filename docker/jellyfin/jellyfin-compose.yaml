@@ -17,11 +17,11 @@ services:
       # CACHE: Stores transcoded media and temporary files
       - /docker/jellyfin/cache:/cache
       
-      # MEDIA MAPPING: Map Host Drives to Container Paths
+      # MEDIA MAPPING: Map Host Drives to Container Paths aincrad en alfheim drives are directly passedtrough from the host to this VM
       # Aincrad (Anime)
       - type: bind
-        source: /drives/aincrad/anime-shows
-        target: /anime-shows
+        source: /drives/aincrad/anime-shows 
+        target: /anime-shows 
       - type: bind
         source: /drives/aincrad/anime-movies
         target: /anime-movies

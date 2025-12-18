@@ -33,16 +33,16 @@ services:
       # --- VPN CONFIGURATION (NordVPN) ---
       - VPN_SERVICE_PROVIDER=nordvpn
       - VPN_TYPE=openvpn # VPN provider
-      - OPENVPN_USER=Lpc8FjMND5HTmEg5pJ7HKa3x
-      - OPENVPN_PASSWORD=mmssMbjFzWdJFdxeisWzHTqD
-      - SERVER_COUNTRIES=Poland # Optional: Restrict to a specific country
+      - OPENVPN_USER=${nordvpn-usr} # See .env file
+      - OPENVPN_PASSWORD=${nordvpn-passwd} # See .env file
+      - SERVER_COUNTRIES=Poland # Optional: Restrict to a specific country makes it easy in qBit to check if gluetun is wroking
       - TZ=Europe/Amsterdam
 
       # Recommended for NordVPN and P2P traffic
       - NORDVPN_PROTOCOL=tcp
 
       # Optional: Add local network so the *arr apps can talk to other non-VPN services (e.g., NAS, reverse proxy)
-      - FIREWALL_OUTBOUND_SUBNETS=192.168.2.0/24 # REPLACE with local subnet
+      - FIREWALL_OUTBOUND_SUBNETS=${lanip} # See .env file
 
     volumes:
       - /docker/gluetun:/gluetun
@@ -50,6 +50,7 @@ services:
 
   # ---
   # Client Containers (Behind the VPN)
+  # 'service:gluetun' network, handles securing their indexer/download traffic.
   # ---
 
   qbittorrent:
@@ -89,18 +90,16 @@ services:
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
-    # The *arr apps only need to communicate with Prowlarr and qBittorrent, which are
-    # on the same 'service:gluetun' network, securing their indexer/download traffic.
     network_mode: "service:gluetun"
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Amsterdam
-      - PORT=8989 # need to specify the port cauze there is more then 1 instance in the compose
+      - PORT=8989 # need to specify the port because there is more then one instance in the compose
     volumes:
       - /docker/sonarr/config:/config
-      - /drives/alfheim//tv-shows:/tv-shows
-      - /drives/theseed/downloads:/downloads
+      - /drives/alfheim//tv-shows:/tv-shows # location for TV shows on atlantis server, this is a NFS shared drive
+      - /drives/theseed/downloads:/downloads # locations of where qBit puts its downloads
     depends_on:
       gluetun:
         condition: service_healthy
@@ -117,8 +116,8 @@ services:
       - PORT=8990 # Need to differentiatie all the ports and then name the instance in the settings under general > advanced > hostname
     volumes:
       - /docker/sonarr-anime/config:/config # Separate config for separate instance
-      - /drives/aincrad/anime-shows:/anime-shows
-      - /drives/theseed/downloads:/downloads
+      - /drives/aincrad/anime-shows:/anime-shows # location for anime shows on atlantis server, this is a NFS shared drive
+      - /drives/theseed/downloads:/downloads # locations of where qBit puts its downloads
     depends_on:
       gluetun:
         condition: service_healthy
@@ -132,10 +131,10 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Amsterdam
-      - PORT=7878 # need to specify the port cauze there is more then 1 instance in the compose
+      - PORT=7878 # need to specify the port because there is more then one instance in the compose
     volumes:
       - /docker/radarr/config:/config
-      - /drives/alfheim/movies:/movies
+      - /drives/alfheim/movies:/movies # location for movies on atlantis server, this is a NFS shared drive
       - /drives/theseed/downloads:/downloads
     depends_on:
       gluetun:
@@ -153,7 +152,7 @@ services:
       - PORT=7879 # Need to differentiatie all the ports and then name the instance in the settings under general > advanced > hostname
     volumes:
       - /docker/radarr-anime/config:/config # Separate config for separate instance
-      - /drives/aincrad/anime-movies:/anime-movies
+      - /drives/aincrad/anime-movies:/anime-movies # location for anime movies on atlantis server, this is a NFS shared drive
       - /drives/theseed/downloads:/downloads
     depends_on:
       gluetun:
