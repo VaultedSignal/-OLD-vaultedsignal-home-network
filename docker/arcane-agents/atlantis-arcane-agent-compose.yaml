@@ -1,0 +1,15 @@
+services:
+  arcane-edge-agent:
+    image: ghcr.io/getarcaneapp/arcane-headless:latest
+    container_name: atlantis-arcane-edge-agent
+    restart: unless-stopped
+    environment:
+      - EDGE_AGENT=true
+      - EDGE_TRANSPORT=poll
+      - AGENT_TOKEN=arc_f6f335a51eefbb2bb1592542d08555ddce5972c8495ed1d19975162e9fe6295f
+      - MANAGER_API_URL=http://192.168.2.201:3552
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /docker/arcane/arcane-data:/app/data
+volumes:
+  arcane-data:
