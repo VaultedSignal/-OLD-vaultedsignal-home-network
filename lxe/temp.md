@@ -1,0 +1,1 @@
+I have an tailscale LXE that funtions as an exit node for remote acces.
