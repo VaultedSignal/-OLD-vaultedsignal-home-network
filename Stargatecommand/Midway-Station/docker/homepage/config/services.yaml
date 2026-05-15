@@ -1,0 +1,136 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/configs/services/
+# Need to make and fix secrets.yaml
+# Add container status
+
+- Networking:
+    - Pi-Hole:
+        href: http://192.168.2.253/admin
+        description: Network wide ad blocking
+        icon: pi-hole.png
+        widget:
+          type: pihole
+          url: http://192.168.2.253
+          version: 6
+          key: "U6W8y4CEr/U/ywoWjbrUoHEKorCms5zs2eXNIMrm/fE="
+    - WatchYourLAN:
+        href: http://192.168.2.201:8840
+        description: Network device detection
+        icon: watchyourlan.png
+
+- Monitoring:
+    - Uptime Kuma:
+        href: http://192.168.2.201:3001
+        description: Service uptime monitoring
+        icon: uptime-kuma.png
+        widget:
+          type: uptimekuma
+          url: http://192.168.2.201:3001
+          slug: containers
+    - Beszel:
+        href: http://192.168.2.201:8090
+        description: Server monitoring
+        icon: beszel.png
+        widget:
+          type: beszel
+          url: http://192.168.2.201:8090
+          username: carter@vaultedsignal.com
+          password: 2b#7n^rSVM#NG59%hHrL
+          systemId: StargateCommand
+          version: 2
+
+- Management:
+    - Portainer:
+        href: https://192.168.2.201:9443
+        description: Docker management
+        icon: portainer.png
+    - Arcane:
+        href: http://192.168.2.201:3552
+        description: Docker management
+        icon: arcane.png
+
+- Media:
+    - Movies and TV-shows:
+      - Jellyfin:
+          href: http://192.168.2.202:8096
+          description: Media server
+          icon: jellyfin.png
+          widget:
+            type: jellyfin
+            url: http://192.168.2.202:8096
+            key: "7362a6134f284467a2e48a307ad3798b"
+      - Seerr:
+          href: http://192.168.2.202:5055
+          description: Media requests
+          icon: jellyseerr.png
+          widget:
+            type: jellyseerr
+            url: http://192.168.2.202:5055
+            key: "MTc3NjY5OTAyODAwOGI2ZmViMjQxLTcwMWMtNDAyYy1hZDg0LTEwOWUxNzY3NmEzMw=="
+      - Jellystat:
+          href: http://192.168.2.202:3000
+          description: Jellyfin statistics
+          icon: jellystat.png
+
+    - Books:
+      - Kavita:
+          href: http://192.168.2.202:5000
+          description: Digital library
+          icon: kavita.png
+          widget:
+            type: kavita
+            url: http://192.168.2.202:5000
+            username: VaultedSignal
+            password: AsunaHaKAwaiiDesu1488!
+
+- Media aggregation:
+    - qBittorrent:
+        href: http://192.168.2.203:8080
+        description: Torrent client
+        icon: qbittorrent.png
+        widget:
+          type: qbittorrent
+          url: http://192.168.2.203:8080
+          username: eli
+          password: AsunaHaKawaiiDesu1488!
+    - Sonarr:
+        href: http://192.168.2.203:8989
+        description: TV show management
+        icon: sonarr.png
+        widget:
+          type: sonarr
+          url: http://192.168.2.203:8989
+          key: "d3058e6227ab4124a51d5fc765249f44"
+    - Sonarr Anime:
+        href: http://192.168.2.203:8990
+        description: Anime show management
+        icon: sonarr.png
+        widget:
+          type: sonarr
+          url: http://192.168.2.203:8990
+          key: "07701aca846945799389a1e6c9edff0c"
+    - Radarr:
+        href: http://192.168.2.203:7878
+        description: Movie management
+        icon: radarr.png
+        widget:
+          type: radarr
+          url: http://192.168.2.203:7878
+          key: "0ad2675765e44b9b91fb69cf131f2949"
+    - Radarr Anime:
+        href: http://192.168.2.203:7879
+        description: Anime movie management
+        icon: radarr.png
+        widget:
+          type: radarr
+          url: http://192.168.2.203:7879
+          key: "1648cf736fae4895bf29fc587fdb1c12"
+    - Prowlarr:
+        href: http://192.168.2.203:9696
+        description: Indexer management
+        icon: prowlarr.png
+        widget:
+          type: prowlarr
+          url: http://192.168.2.203:9696
+          key: "32ad52fafe064a8399e0cd0336e24e9a"

@@ -1,0 +1,36 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/configs/bookmarks
+
+- Developer:
+    - Github:
+        - abbr: GH
+          href: https://github.com/VaultedSignal/vaultedsignal-home-network
+
+- Entertainment:
+    - YouTube:
+        - abbr: YT
+          href: https://youtube.com/
+    - Youtube Music:
+        - abbr: YTM
+          href: https://music.youtube.com/
+    - Twitch:
+        - abbr: Twitch
+          href: https://www.twitch.tv/
+
+- Anime:
+    - MyAnimeList:
+        - abbr: MAL
+          href: https://myanimelist.net/animelist/VaultedSignal
+    - AnimeSchedule:
+        - abbr: AS
+          href: https://animeschedule.net/
+    - Nyaa:
+        - abbr: Nyaa
+          href: https://nyaa.si/
+
+- Financial:
+    - YaHooFinance:
+        - abbr: YF
+          href: https://finance.yahoo.com/portfolio/p_6/view/v1
+    

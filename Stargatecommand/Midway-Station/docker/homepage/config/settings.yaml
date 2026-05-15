@@ -1,0 +1,10 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/configs/settings/
+
+title: VaultedSignal HN
+description: VaultedSingal home network landing page.
+favicon: /images/favicon-32x32.png
+theme: dark
+color: stone
+headerStyle: clean

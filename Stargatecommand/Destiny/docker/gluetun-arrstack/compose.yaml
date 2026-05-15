@@ -22,12 +22,6 @@ services:
       - "7878:7878"
       # Radarr-Anime Web UI (using host port 7879 to avoid conflict)
       - "7879:7879"
-      # Huntarr Web UI (default 8686 - note: Huntarr is not official, confirm port if different)
-      - "8686:8686"
-      # Cleanuparr Web UI (default 5050 - if it has one, adjust port if different)
-      - "5050:5050"
-      # Jellyseerr Web UI (default 5055)
-      - "5055:5055"
 
     environment:
       # --- VPN CONFIGURATION (NordVPN) ---
@@ -35,7 +29,7 @@ services:
       - VPN_TYPE=openvpn # VPN provider
       - OPENVPN_USER=${nordvpn-usr} # See .env file
       - OPENVPN_PASSWORD=${nordvpn-passwd} # See .env file
-      - SERVER_COUNTRIES=Poland # Optional: Restrict to a specific country makes it easy in qBit to check if gluetun is wroking
+      # - SERVER_COUNTRIES=Poland # Optional: Restrict to a specific country makes it easy in qBit to check if gluetun is wroking
       - TZ=Europe/Amsterdam
 
       # Recommended for NordVPN and P2P traffic
@@ -154,53 +148,6 @@ services:
       - /docker/radarr-anime/config:/config # Separate config for separate instance
       - /drives/aincrad/anime-movies:/anime-movies # location for anime movies on atlantis server, this is a NFS shared drive
       - /drives/theseed/downloads:/downloads
-    depends_on:
-      gluetun:
-        condition: service_healthy
-    restart: unless-stopped
-
-  huntarr:
-    image: ghcr.io/plexguide/huntarr:latest
-    container_name: huntarr
-    network_mode: "service:gluetun"
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Amsterdam
-      - PORT=8686 # Default is often 8686
-    volumes:
-      - /docker/huntarr/config:/config
-    depends_on:
-      gluetun:
-        condition: service_healthy
-    restart: unless-stopped
-
-  cleanuparr:
-    image: ghcr.io/cleanuparr/cleanuparr:latest
-    container_name: cleanuparr
-    network_mode: "service:gluetun"
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Amsterdam
-      - PORT=5050 # Default is often 5050
-    volumes:
-      - /docker/cleanuparr/config:/config
-    depends_on:
-      gluetun:
-        condition: service_healthy
-    restart: unless-stopped
-
-  jellyseerr:
-    image: ghcr.io/fallenbagel/jellyseerr:latest
-    container_name: jellyseerr
-    network_mode: "service:gluetun"
-    environment:
-      - LOG_LEVEL=debug
-      - TZ=Europe/Amsterdam
-      - PORT=5055
-    volumes:
-      - /docker/jellyseerr/config:/app/config
     depends_on:
       gluetun:
         condition: service_healthy

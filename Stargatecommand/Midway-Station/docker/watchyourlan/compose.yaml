@@ -1,0 +1,11 @@
+services:
+  watchyourlan:
+    image: aceberg/watchyourlan:latest
+    container_name: watchyourlan
+    network_mode: host
+    volumes:
+      - /docker/watchyourlan/data:/data
+  environment:
+    - TZ=Europe/Amsterdam
+    - IFACE=enp6s18
+    restart: unless-stopped
